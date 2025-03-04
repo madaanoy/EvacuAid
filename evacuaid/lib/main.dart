@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:evacuaid/widgets/BlguNavbar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -37,16 +38,6 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -55,15 +46,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  int _selectedIndex = 0;
 
-  void _incrementCounter() {
+  void _onItemTapped(int index) {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _selectedIndex = index;
     });
   }
 
@@ -112,11 +99,35 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      bottomNavigationBar: BlguNavbar()
+      // Container(
+      //   decoration: BoxDecoration(
+      //     border: Border(top: BorderSide(width: 1, color: Color(0xffE5E5E5)))),
+      //   child: BottomNavigationBar(
+      //   items: const <BottomNavigationBarItem>[
+      //     BottomNavigationBarItem(icon: Icon(Icons.content_paste_rounded), label: 'Summary'),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.family_restroom_rounded),
+      //       label: 'Families',
+      //     ),
+      //     BottomNavigationBarItem(icon: Icon(Icons.home_work_rounded), label: 'Centers'),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.notifications_active_rounded),
+      //       label: 'Notifications',
+      //     ),
+      //   ],
+      //   currentIndex: _selectedIndex,
+      //   selectedItemColor: Color(0xff0438D1),
+      //   unselectedItemColor: Color(0xff020202),
+      //   showUnselectedLabels: true,
+      //   type: BottomNavigationBarType.fixed,
+      //   onTap: (int index) {
+      //     setState(() {
+      //       _selectedIndex = index;
+      //     });
+      //   },
+      // ),
+      // )
     );
   }
 }
