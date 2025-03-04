@@ -55,7 +55,10 @@ class MyApp extends StatelessWidget {
           error: Color(0xffff3333), 
           onError: Colors.white, 
           surface: Colors.white, 
-          onSurface: Color(0xff212121)
+          onSurface: Color(0xff212121),
+          outline: Color(0xffE5E5E5),
+          surfaceContainer: Color(0xffF4F4F4),
+          surfaceContainerLow: Color(0xffBDBDBD)
         ),
         textTheme: TextTheme(
           headlineSmall: TextStyle(
@@ -64,7 +67,7 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.bold
           ),
           titleLarge: TextStyle(
-            fontSize: 24,
+            fontSize: 20,
             color: Color(0xff000000),
             fontWeight: FontWeight.w500
           ),

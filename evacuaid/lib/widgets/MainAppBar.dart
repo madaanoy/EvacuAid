@@ -24,9 +24,8 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(4.0),
-        child: Container(color: Color(0xffE5E5E5), height: 1),
-      ),
-    );
+        child: Container(color: Theme.of(context).colorScheme.outline, height: 1),
+    ));
   }
 
   @override
