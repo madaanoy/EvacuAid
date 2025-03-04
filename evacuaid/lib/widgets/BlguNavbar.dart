@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controller/BlguNavigationController.dart';
+import 'package:go_router/go_router.dart';
 
 class BlguNavbar extends StatelessWidget {
   // const BlguNavbar({Key? key}) : super(key: key);
   final int activeIndex;
-
   const BlguNavbar(this.activeIndex, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    BlguNavigationController navigation = Provider.of<BlguNavigationController>(context, listen: false);
     
     return Container(
       decoration: BoxDecoration(
@@ -43,16 +42,16 @@ class BlguNavbar extends StatelessWidget {
         onTap: (int index) {
           switch (index) {
             case 0:
-              navigation.changeScreen('/');
+              context.go('/');
               break;
             case 1:
-              navigation.changeScreen('/families');
+              context.go('/families');
               break;
             case 2:
-              navigation.changeScreen('/centers');
+              context.go('/centers');
               break;
             case 3:
-              navigation.changeScreen('/notifications');
+              context.go('/notifications');
               break;
             default:
           }

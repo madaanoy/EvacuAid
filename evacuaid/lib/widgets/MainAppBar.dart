@@ -7,6 +7,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
+      backgroundColor: Theme.of(context).colorScheme.secondary,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -16,7 +17,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
             icon: Icon(
               Icons.account_circle_rounded,
               size: 24,
-              color: Color(0xff0438D1),
+              color: Theme.of(context).colorScheme.onPrimary,
             ),
           ),
         ],
