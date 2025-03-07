@@ -17,9 +17,12 @@ class BlguFamilyList extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Family Members',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold, // Keep bold styling
+                  ),
                 ),
                 RichText(
                   text: const TextSpan(
