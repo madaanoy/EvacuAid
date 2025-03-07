@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../widgets/BlguNavbar.dart';
-import '../widgets/MainAppBar.dart';
+import '../widgets/blgunavbar.dart';
+import '../widgets/mainappbar.dart';
 
 class BlguFamilyList extends StatelessWidget {
   const BlguFamilyList({super.key});

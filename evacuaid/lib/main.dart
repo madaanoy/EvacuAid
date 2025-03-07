@@ -1,7 +1,7 @@
 import 'package:evacuaid/screens/blguCreateEvacCenter.dart';
 import 'package:evacuaid/screens/blguFamilyList.dart';
-import 'package:evacuaid/screens/blguNotifications.dart';
-import 'package:evacuaid/screens/blguSummary.dart';
+import 'package:evacuaid/screens/blgunotifications.dart';
+import 'package:evacuaid/screens/blgusummary.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 // import 'package:google_fonts/google_fonts.dart';

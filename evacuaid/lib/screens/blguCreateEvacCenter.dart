@@ -6,12 +6,12 @@ Description: Ticket [EVA-42]'[UI] Establish Evaciation Screen' must be coded.
 This is where you can add evacuation centers or kabarangay shelters.
 */
 
-import 'package:evacuaid/widgets/CustomButton.dart';
-import 'package:evacuaid/widgets/CustomTextInput.dart';
+import 'package:evacuaid/widgets/custombutton.dart';
+import 'package:evacuaid/widgets/customtextinput.dart';
 import 'package:flutter/material.dart';
-import '../widgets/BlguNavbar.dart';
-import '../widgets/MainAppBar.dart';
-import '../widgets/CustomDropDown.dart';
+import '../widgets/blgunavbar.dart';
+import '../widgets/mainappbar.dart';
+import '../widgets/customdropdown.dart';
 
 class BlguCreateEvacCenter extends StatelessWidget {
   const BlguCreateEvacCenter({super.key});
