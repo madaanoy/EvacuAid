@@ -1,3 +1,10 @@
+/* Authored by: Michael Angelo M. Daanoy
+Company: Patent Pending
+Project: EvacuAid
+Feature: [EVA-063] [DEV] Family List Screen
+Description: Screen for showing the family head and their members.
+ */
+
 import 'package:flutter/material.dart';
 import '../widgets/blgunavbar.dart';
 import '../widgets/mainappbar.dart';
