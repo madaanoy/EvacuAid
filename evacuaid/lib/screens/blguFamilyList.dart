@@ -28,7 +28,7 @@ class BlguFamilyList extends StatelessWidget {
                   'Family Members',
                   style: Theme.of(context).textTheme.headlineSmall!.copyWith(
                     color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold, // Keep bold styling
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 RichText(
@@ -56,73 +56,182 @@ class BlguFamilyList extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: DataTable(
-                columns: const [
-                  DataColumn(
-                    label: Text(
-                      'Last Name',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'First Name',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Contact No.',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-                rows: const [
-                  DataRow(
-                    cells: [
-                      DataCell(
-                        Text('Daanoy', style: TextStyle(color: Colors.red)),
-                      ),
-                      DataCell(
-                        Text(
-                          'Michael Angelo',
-                          style: TextStyle(color: Colors.red),
+
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                child: Column(
+                  children: [
+                    DataTable(
+                      columnSpacing: 16,
+                      columns: const [
+                        DataColumn(
+                          label: Text(
+                            'Last Name',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                      DataCell(
-                        Text(
-                          '09498014593',
-                          style: TextStyle(color: Colors.red),
+                        DataColumn(
+                          label: Text(
+                            'First Name',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  DataRow(
-                    cells: [
-                      DataCell(Text('Daanoy')),
-                      DataCell(Text('Juana')),
-                      DataCell(Text('09498014593')),
-                    ],
-                  ),
-                  DataRow(
-                    cells: [
-                      DataCell(Text('Daanoy')),
-                      DataCell(Text('Michael Angelo')),
-                      DataCell(Text('09498014593')),
-                    ],
-                  ),
-                ],
+                        DataColumn(
+                          label: Text(
+                            'Contact No.',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                      rows: const [
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Text(
+                                'Daanoy',
+                                style: TextStyle(color: Color.fromARGB(255, 73, 180, 69)),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                'Michael Angelo',
+                                style: TextStyle(color: Color.fromARGB(255, 73, 180, 69)),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                '09498014593',
+                                style: TextStyle(color: Color.fromARGB(255, 73, 180, 69)),
+                              ),
+                            ),
+                          ],
+                        ),
+                        DataRow(
+                          cells: [
+                            DataCell(Text('Daanoy')),
+                            DataCell(Text('Juana')),
+                            DataCell(Text('09498014593')),
+                          ],
+                        ),
+                        DataRow(
+                          cells: [
+                            DataCell(Text('Daanoy')),
+                            DataCell(Text('Michael Angelo')),
+                            DataCell(Text('09498014593')),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: const BlguNavbar(1),
+
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddFamilyMemberDialog(context);
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  // Function to show the overlay
+  void _showAddFamilyMemberDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // Makes it full-screen height if needed
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom:
+                MediaQuery.of(context).viewInsets.bottom +
+                16.0, // Adjust for keyboard
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Add Family Member',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+
+              // Last Name Field
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // First Name Field
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Contact Number Field
+              TextFormField(
+                decoration: const InputDecoration(
+                  labelText: 'Contact No.',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 20),
+
+              // Buttons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Close the modal
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () {
+                      // This is where you'll handle saving data later
+                      Navigator.pop(context);
+                    },
+                    child: const Text('Save'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
