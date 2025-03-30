@@ -9,7 +9,6 @@ class SplashScreen extends StatelessWidget {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          // If you have an asset image, make sure it's in your pubspec.yaml
           image: DecorationImage(
             image: AssetImage('assets/images/splash_background.jpg'),
             fit: BoxFit.cover,
@@ -26,11 +25,11 @@ class SplashScreen extends StatelessWidget {
                 Text(
                   'EVACUAID',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: const Color(0xff0438D1),
-                  ),
+                        color: const Color(0xff0438D1),
+                      ),
                 ),
-                
                 const SizedBox(height: 16),
+
                 // Subtitle / Tagline
                 const Text(
                   'In times of calamity, every second counts.\n'
@@ -43,8 +42,8 @@ class SplashScreen extends StatelessWidget {
                 // "I'm a BLGU" button
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to the BLGU summary route
-                    context.push('/summary');
+                    // Navigate to BLGU user option screen
+                    context.push('/blgu_option');
                   },
                   child: const Text("I'm a BLGU"),
                 ),
@@ -54,8 +53,8 @@ class SplashScreen extends StatelessWidget {
                 // "I'm a Camp Manager" button
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to the route for camp manager
-                    context.push('/centers');
+                    // Navigate to Camp Manager user option screen
+                    context.push('/campmanager_option');
                   },
                   child: const Text("I'm a Camp Manager"),
                 ),
