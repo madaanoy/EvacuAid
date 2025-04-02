@@ -1,16 +1,15 @@
+import 'package:evacuaid/screens/blgu_user_login.dart';
+import 'package:evacuaid/screens/blgu_user_option.dart';
+import 'package:evacuaid/screens/blgu_user_register.dart';
+import 'package:evacuaid/screens/campmanager_user_option.dart';
+import 'package:evacuaid/screens/create_evac_center.dart';
+import 'package:evacuaid/screens/family_list.dart';
+import 'package:evacuaid/screens/evac_center_list.dart';
+import 'package:evacuaid/screens/notifications.dart';
+import 'package:evacuaid/screens/splash_screen.dart';
+import 'package:evacuaid/screens/summary.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-// Screens
-import 'package:evacuaid/screens/blguCreateEvacCenter.dart';
-import 'package:evacuaid/screens/blguFamilyList.dart';
-import 'package:evacuaid/screens/blgunotifications.dart';
-import 'package:evacuaid/screens/blgusummary.dart';
-import 'package:evacuaid/screens/splash_screen.dart';
-import 'package:evacuaid/screens/blgu_user_option.dart';
-import 'package:evacuaid/screens/campmanager_user_option.dart';
-import 'package:evacuaid/screens/blgu_user_register.dart';
-import 'package:evacuaid/screens/blgu_user_login.dart';
 
 final _router = GoRouter(
   initialLocation: '/',
@@ -32,6 +31,18 @@ final _router = GoRouter(
       builder: (context, state) => BlguFamilyList(),
     ),
     GoRoute(
+      name: 'centers',
+      path: '/centers',
+      builder: (context, state) => BlguEvacCenterList(),
+      routes: <RouteBase>[
+        GoRoute(
+          name: 'establish_evac',
+          path: 'establish_evac',
+          builder: (context, state) => BlguCreateEvacCenter(),
+        ),
+      ],
+    ),
+    GoRoute(
       name: 'notifications',
       path: '/notifications',
       builder: (context, state) => BlguNotifications(),
@@ -39,7 +50,14 @@ final _router = GoRouter(
     GoRoute(
       name: 'centers',
       path: '/centers',
-      builder: (context, state) => BlguCreateEvacCenter(),
+      builder: (context, state) => BlguEvacCenterList(),
+      routes: <RouteBase>[
+        GoRoute(
+          name: 'establish_evac',
+          path: 'establish_evac',
+          builder: (context, state) => BlguCreateEvacCenter(),
+        ),
+      ],
     ),
     GoRoute(
       name: 'blgu_option',
@@ -79,22 +97,40 @@ class MyApp extends StatelessWidget {
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
           primary: Color(0xff0438D1),
-          // Change this from primaryVariant to primaryContainer
-          primaryContainer: Color(0xff032A9E),
           onPrimary: Colors.white,
           secondary: Color(0xffD10438),
-          // Change this from secondaryVariant to secondaryContainer
-          secondaryContainer: Color(0xffA8032A),
           onSecondary: Colors.white,
           error: Color(0xffff3333),
           onError: Colors.white,
-          background: Colors.white,
-          onBackground: Color(0xff212121),
           surface: Colors.white,
           onSurface: Color(0xff212121),
+          outline: Color(0xffE5E5E5),
+          surfaceContainer: Color(0xffF4F4F4),
+          surfaceContainerLow: Color(0xffD9D9D9),
         ),
-        // Rest of your theme configuration remains the same
+        textTheme: TextTheme(
+          headlineSmall: TextStyle(
+            fontSize: 28,
+            color: Color(0xff000000),
+            fontWeight: FontWeight.bold,
+          ),
+          titleLarge: TextStyle(
+            fontSize: 20,
+            color: Color(0xff000000),
+            fontWeight: FontWeight.w500,
+          ),
+          titleMedium: TextStyle(
+            fontSize: 20,
+            color: Color(0xff212121),
+            fontStyle: FontStyle.italic,
+          ),
+          titleSmall: TextStyle(
+            fontSize: 16,
+            color: Color(0xff212121),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
       ),
-    );
+    ));
   }
 }

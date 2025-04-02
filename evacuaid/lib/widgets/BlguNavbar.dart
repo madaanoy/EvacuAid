@@ -1,9 +1,9 @@
 /* Authored by: Raymund Joseph M. Rosco
 Company: Patent Pending
 Project: EvacuAid
-Feature: [EVA-58] [DEV] Estalbish Evacuation Screen
-Description: Ticket [EVA-42]'[UI] Establish Evaciation Screen' must be coded. 
-This is where you can add evacuation centers or kabarangay shelters.
+Feature: [EVA-66] [DEV] BLGU Navigation Bar Component
+Description: Ticket [EVA-65]'[UI] BLGU Navigation Bar Component' must be coded. 
+This is where navigate through screens such as Summary, Families, Centers, and Notifications.
 */
 
 import 'package:flutter/material.dart';

@@ -17,6 +17,7 @@ class _CustomDropDownState extends State<CustomDropDown> {
     list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
   );
   String dropdownValue = list.first;
+
   @override
   Widget build(BuildContext context) {
     return DropdownMenu<String>(
@@ -32,7 +33,7 @@ class _CustomDropDownState extends State<CustomDropDown> {
           color: Theme.of(context).colorScheme.surfaceContainerLow,
         ),
       ),
-      hintText: 'Select camp manager...',
+      hintText: dropdownValue,
       onSelected: (String? value) {
         setState(() {
           dropdownValue = value!;
