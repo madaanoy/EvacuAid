@@ -46,7 +46,7 @@ class BlguFamilyList extends StatelessWidget {
                       columnSpacing: 24,
                       dataRowHeight: 48,
                       headingRowHeight: 48,
-                      headingRowColor: MaterialStateProperty.resolveWith(
+                      headingRowColor: WidgetStateProperty.resolveWith(
                         (states) => const Color.fromARGB(255, 4, 55, 209),
                       ),
                       columns: const [

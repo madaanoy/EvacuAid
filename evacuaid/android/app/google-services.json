@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "232374549042",
+    "project_id": "evacuaid-76074",
+    "storage_bucket": "evacuaid-76074.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:232374549042:android:000855b9f8d3709d561a2b",
+        "android_client_info": {
+          "package_name": "com.example.evacuaid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBB4BsBRUgq6GOuJRAz3E_9-5KQ8Soqyfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

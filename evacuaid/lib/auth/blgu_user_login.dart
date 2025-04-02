@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:evacuaid/screens/blgu_user_register.dart';
+import 'package:evacuaid/auth/blgu_user_register.dart';
+import 'package:evacuaid/auth/firebase_auth_service.dart';
+import 'package:evacuaid/screens/splash_screen.dart'; // Assume you have a home screen
 
-// Login Screen Implementation
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -12,12 +13,77 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = FirebaseAuthService();
+  bool _isLoading = false;
+  String? _errorMessage;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Validate input
+      if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+        throw 'Please fill in all fields';
+      }
+
+      // Sign in with Firebase
+      await _authService.signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
+
+      // Navigate to home screen if successful
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const SplashScreen()),
+      );
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    // Check if email is provided
+    if (_emailController.text.isEmpty) {
+      setState(() {
+        _errorMessage = 'Please enter your email address to reset password';
+      });
+      return;
+    }
+
+    try {
+      await _authService.resetPassword(_emailController.text.trim());
+      
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password reset email sent. Please check your inbox.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+    }
   }
 
   @override
@@ -68,6 +134,22 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    
+                    // Error message display
+                    if (_errorMessage != null)
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _errorMessage!,
+                          style: TextStyle(color: Colors.red.shade800),
+                        ),
+                      ),
+                      
                     const Text(
                       'Email',
                       style: TextStyle(
@@ -118,13 +200,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       obscureText: true,
+                      onSubmitted: (_) => _signIn(),
                     ),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                          // Handle forgot password
-                        },
+                        onPressed: _forgotPassword,
                         child: const Text(
                           'Forgot password?',
                           style: TextStyle(
@@ -141,9 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Implement login logic
-                  },
+                  onPressed: _isLoading ? null : _signIn,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xff0A2885),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -151,10 +230,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 16),
