@@ -22,10 +22,10 @@ class BlguNotifications extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            NotificationWidget(receiver: "MSWDO", date: '8:00 PM, January 24, 2025'),
-            NotificationWidget(receiver: "BLGU", date: '6:00 PM, January 24, 2025'),
-            NotificationWidget(receiver: "BLGU", date: '5:40 PM, January 24, 2025'),
-            NotificationWidget(receiver: "MSWDO", date: '5:30 PM, January 24, 2025'),
+            NotificationWidget(date: '8:00 PM, January 24, 2025'),
+            NotificationWidget(date: '6:00 PM, January 24, 2025'),
+            NotificationWidget(date: '5:40 PM, January 24, 2025'),
+            NotificationWidget(date: '5:30 PM, January 24, 2025'),
           ],
         ),
       ),

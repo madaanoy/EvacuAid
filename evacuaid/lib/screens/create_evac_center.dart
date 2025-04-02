@@ -6,20 +6,40 @@ Description: Ticket [EVA-42]'[UI] Establish Evaciation Screen' must be coded.
 This is where you can add evacuation centers or kabarangay shelters.
 */
 
+import 'package:evacuaid/widgets/backappbar.dart';
 import 'package:evacuaid/widgets/custombutton.dart';
 import 'package:evacuaid/widgets/customtextinput.dart';
 import 'package:flutter/material.dart';
-import '../widgets/blgunavbar.dart';
-import '../widgets/mainappbar.dart';
-import '../widgets/customdropdown.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+
+// class BlguCreateEvacCenter extends StatefulWidget {
+//   const BlguCreateEvacCenter({super.key});
+
+//   @override
+//   State<BlguCreateEvacCenter> createState() => _BlguCreateEvacCenterState();
+// }
 
 class BlguCreateEvacCenter extends StatelessWidget {
-  const BlguCreateEvacCenter({super.key});
+  final nameController = TextEditingController();
+  final addressController = TextEditingController();
+  final campManagerController = TextEditingController();
+  final dropDownKey = GlobalKey<DropdownSearchState>();
+  List<String> dropDownList = [
+    "Jake the Dog",
+    "Finn the Human",
+    "Finn the Human",
+    "Finn the Human",
+    "Finn the Human",
+    "Add new Camp Manager",
+  ];
+
+  BlguCreateEvacCenter({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: MainAppBar(),
+      resizeToAvoidBottomInset: false,
+      appBar: BackAppBar(),
       body: Container(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -59,7 +79,7 @@ class BlguCreateEvacCenter extends StatelessWidget {
                   'Ilagay ang pangalan ng gusali o may-ari nito.',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                CustomTextInput(),
+                CustomTextInput(textController: nameController),
               ],
             ),
             Column(
@@ -71,7 +91,7 @@ class BlguCreateEvacCenter extends StatelessWidget {
                   'Ilagay ang building o house number at zone number.',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                CustomTextInput(),
+                CustomTextInput(textController: addressController),
               ],
             ),
             Column(
@@ -94,8 +114,7 @@ class BlguCreateEvacCenter extends StatelessWidget {
                       isCollapsed: true,
                       hintText: 'Brgy. Sto. Domingo, Bombon, Cam. Sur',
                       hintStyle: TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.onSurface,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       filled: true,
                       fillColor: Theme.of(context).colorScheme.surfaceContainer,
@@ -127,15 +146,63 @@ class BlguCreateEvacCenter extends StatelessWidget {
                   'Pindutin ang pindutan sa baba at pumili sa lista. Maaari rin mag-rehistro ng bago.',
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
-                // TO-ALTER: Automatic based on LGU
-                CustomDropDown(),
+                DropdownSearch<String>(
+                  items: (f, cs) => dropDownList,
+                  decoratorProps: DropDownDecoratorProps(
+                    decoration: InputDecoration(
+                      hintText: "Select Campaign Manager",
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.outline,
+                        ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      hintStyle: TextStyle(
+                        fontSize: 16,
+                        color:
+                            Theme.of(context).colorScheme.surfaceContainerLow,
+                      ),
+                    ),
+                  ),
+                  popupProps: PopupProps.dialog(
+                    title: Container(
+                      decoration: BoxDecoration(color: ColorScheme.of(context).secondary),
+                      alignment: Alignment.center,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        'Select/Add New Campaign Manager',
+                        style: TextTheme.of(context).titleLarge?.copyWith(
+                          fontSize: 16,
+                          color: Colors.white)
+                      ),
+                    ),
+                    dialogProps: DialogProps(
+                      clipBehavior: Clip.antiAlias,
+                      shape: OutlineInputBorder(
+                        borderSide: BorderSide(width: 0),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
-            CustomButton(),
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: CustomButton(
+                  buttonText: "Add Evacuation Center",
+                  customFunction: () => {print(nameController.text)},
+                ),
+              ),
+            ),
           ],
         ),
       ),
-      bottomNavigationBar: const BlguNavbar(2),
     );
   }
 }

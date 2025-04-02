@@ -1,21 +1,11 @@
 import 'package:flutter/material.dart';
 
 class NotificationWidget extends StatelessWidget {
-  final String receiver;
   final String date;
-  const NotificationWidget({super.key, required this.receiver, required this.date});
+  const NotificationWidget({super.key, required this.date});
 
   @override
   Widget build(BuildContext context) {
-    Color getColor() {
-      if (receiver == "MSWDO") {
-        return Theme.of(context).colorScheme.primary;
-      } else if (receiver == "BLGU") {
-        return Theme.of(context).colorScheme.secondary;
-      }
-
-      return Colors.black;
-    }
 
     return Container(
       margin: EdgeInsets.fromLTRB(0, 0, 0, 12),
@@ -28,10 +18,9 @@ class NotificationWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                "Your report has been sent to the $receiver.",
+                "Your report has been sent.",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: getColor(),
                 ),
               ),
               Text("Sent on $date"),
