@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:evacuaid/auth/firebase_auth_service.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -17,7 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _selectedProvince;
   bool _isLoading = false;
   String? _errorMessage;
-  
+
   final _authService = FirebaseAuthService();
   final _formKey = GlobalKey<FormState>();
 
@@ -35,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -74,7 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      
+
       // Navigate back to login
       Navigator.pop(context);
     } catch (e) {
@@ -98,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(), // Updated to use GoRouter's pop
         ),
       ),
       body: Padding(
@@ -119,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(fontSize: 14, color: Colors.black87),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Error message
                 if (_errorMessage != null)
                   Container(
@@ -147,7 +148,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: 'Input here...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -159,7 +163,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter an email';
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
                       return 'Please enter a valid email';
                     }
                     return null;
@@ -180,7 +186,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: 'Input here...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -327,7 +336,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: 'Input here...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -360,7 +372,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     hintText: 'Input here...',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.grey, width: 1),
+                      borderSide: const BorderSide(
+                        color: Colors.grey,
+                        width: 1,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -394,10 +409,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     child: _isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
                         : const Text(
                             'Register',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                   ),
                 ),
@@ -408,7 +429,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Center(
                   child: TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      context.go('/login');
                     },
                     child: const Text(
                       "Already have an account?",

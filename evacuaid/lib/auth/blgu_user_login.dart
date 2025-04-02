@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:evacuaid/auth/blgu_user_register.dart';
+import 'package:go_router/go_router.dart';
 import 'package:evacuaid/auth/firebase_auth_service.dart';
-import 'package:evacuaid/screens/splash_screen.dart'; // Assume you have a home screen
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,11 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
         password: _passwordController.text.trim(),
       );
 
-      // Navigate to home screen if successful
+      // Use GoRouter instead of Navigator
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SplashScreen()),
-      );
+      context.go('/'); // Navigate to the splash screen using GoRouter
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -71,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await _authService.resetPassword(_emailController.text.trim());
-      
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -90,11 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.pop(), // Use GoRouter's pop
         ),
       ),
       body: Padding(
@@ -134,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Error message display
                     if (_errorMessage != null)
                       Container(
@@ -149,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(color: Colors.red.shade800),
                         ),
                       ),
-                      
+
                     const Text(
                       'Email',
                       style: TextStyle(
@@ -230,29 +226,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                  child:
+                      _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
                 ),
               ),
               const SizedBox(height: 16),
               Center(
                 child: TextButton(
                   onPressed: () {
-                    // Navigate to register screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegisterScreen(),
-                      ),
-                    );
+                    // Use GoRouter instead of Navigator
+                    context.go('/register');
                   },
                   child: const Text(
                     "Don't have an account?",
