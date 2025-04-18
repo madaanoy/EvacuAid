@@ -77,7 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       // Navigate back to login
-      Navigator.pop(context);
+      context.go('/login');
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -393,7 +393,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 32),
 
                 // Register button

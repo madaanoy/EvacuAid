@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // Use GoRouter instead of Navigator
       if (!mounted) return;
-      context.go('/summary'); // Navigate to the splash screen using GoRouter
+      context.go('/'); // Navigate to the splash screen using GoRouter
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const Text(
-                'Hi BLGU! Be prepared. Stay connected. Get help fast.',
+                'Hi Camp Manager! Be prepared. Stay connected. Get help fast.',
                 style: TextStyle(fontSize: 14, color: Colors.black87),
               ),
               const SizedBox(height: 40),
