@@ -56,30 +56,30 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
 
   List<Map<String, dynamic>> campManagers = [];
   List<String> campManagerNames = <String>[];
-  List<MenuEntry>? menuEntries;
+  List<MenuEntry> menuEntries = [];
 
-  Future<List<Map<String, dynamic>>> fetchCampManagers() async {
+  Future<void> fetchCampManagers() async {
     QuerySnapshot campManagerSnapshot =
-        await FirebaseFirestore.instance.collection('campManager').get();
+        await FirebaseFirestore.instance.collection('users').get();
 
     campManagers.clear();
-    menuEntries?.clear();
+    menuEntries.clear();
 
     for (var doc in campManagerSnapshot.docs) {
-      if (doc['assigned'] == false) {
-        campManagers.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
-        campManagerNames.add(doc['firstName'] + ' ' + doc['lastName']);
+      print(doc);
+      if ((doc['role']) == "camp_manager_user") {
+        if (doc['assigned'] == false) {
+          campManagers.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
+          campManagerNames.add(doc['firstName'] + ' ' + doc['lastName']);
+        }
       }
     }
 
-    menuEntries = UnmodifiableListView<MenuEntry>(
-      campManagerNames.map<MenuEntry>(
+    setState(() {
+    menuEntries = campManagerNames.map<MenuEntry>(
         (String name) => MenuEntry(value: name, label: name),
-      ),
-    );
-    setState(() {});
-
-    return campManagers;
+      ).toList();
+    });
   }
 
   @override
@@ -148,7 +148,12 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
       }
 
       CollectionReference campManagerCRef = FirebaseFirestore.instance
-          .collection('campManager');
+          .collection('users');
+
+      await _authService.registerCampManagerWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      );
 
       DocumentReference campManagerRef = await campManagerCRef.add({
         "firstName": _firstNameController.text.trim(),
@@ -158,14 +163,9 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
         "contactNumber": _contactNumberController.text.trim(),
         "dateRegistered": DateTime.now(),
         "assigned": false,
+        "role": "camp_manager_user"
       });
-
-      await _authService.registerCampManagerWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      fetchCampManagers();
+      
       setState(() {});
     } catch (e) {
       print(e);
@@ -228,7 +228,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                             Expanded(
                               flex: 2,
                               child: Text(
-                                "Contact No.",
+                                "Camp Manager",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Theme.of(context).colorScheme.onPrimary
@@ -395,7 +395,8 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
     }
   }
 
-  void showAddEvacCenterDialog(BuildContext context) {
+  void showAddEvacCenterDialog(BuildContext context) async {
+    await fetchCampManagers;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -461,7 +462,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                           _campManager = value;
                         });
                       },
-                      dropdownMenuEntries: menuEntries!,
+                      dropdownMenuEntries: menuEntries,
                     ),
               const SizedBox(height: 20),
               Row(
@@ -548,8 +549,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        _addCampManager();
-                        setState(() {});
+                        await _addCampManager();
                         Navigator.pop(context);
                       } 
                     },

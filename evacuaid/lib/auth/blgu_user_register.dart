@@ -230,16 +230,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButtonFormField<String>(
                                 value: _selectedBarangay,
-                                hint: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                                  child: Text('Barangay'),
-                                ),
+                                hint: Text('Select'),
                                 isExpanded: true,
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
                                 items: <String>[
-                                  'Barangay 1',
-                                  'Barangay 2',
-                                  'Barangay 3',
+                                  'Pagao',
+                                  'Siembre',
+                                  'San Antonio'
+                                  'San Jose',
+                                  'San Francisco',
+                                  'San Isidro',
+                                  'San Roque',
+                                  'Sto. Domingo',
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
@@ -270,7 +272,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Province',
+                            'Municipality/City',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -285,16 +287,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButtonFormField<String>(
                                 value: _selectedProvince,
-                                hint: const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                                  child: Text('Province'),
-                                ),
+                                hint: Text('Select'),
                                 isExpanded: true,
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
                                 items: <String>[
-                                  'Province 1',
-                                  'Province 2',
-                                  'Province 3',
+                                  'Bombon'
                                 ].map<DropdownMenuItem<String>>((String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,

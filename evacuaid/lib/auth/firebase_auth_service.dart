@@ -79,14 +79,9 @@ class FirebaseAuthService {
   }
 
   // Sign out
-  Future<void> blguSignOut(BuildContext context) async {
+  Future<void> signOut(BuildContext context) async {
     await _auth.signOut();
-    context.go('/BLGUlogin');
-  }
-
-  Future<void> cmSignOut(BuildContext context) async {
-    await _auth.signOut();
-    context.go('/CMlogin');
+    context.go('/login');
   }
 
   // Handle Firebase Auth errors

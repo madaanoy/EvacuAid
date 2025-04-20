@@ -48,22 +48,37 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
     list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
   );
   final _authService= FirebaseAuthService();
+  bool? authenticated;
 
   User? user;
-  bool? authenticated;
   String? _selectedFamilyType;
   DateTime? _birthday;
   String? id;
+
+  List<Map<String, dynamic>> users = [];
+  Map<String, dynamic> userDetails = {};
+
+  Future<void> getUserDetails() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+
+    for (var doc in snapshot.docs) {
+      if (doc['email'] == await user?.email) {
+        userDetails = {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+        break;
+      }
+    }
+    setState(() {
+      
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     try {
-      authenticated =  _authService.authenticatedbool;
       user = _authService.currentUser;
-    
-      print("--------------------------------------------------------------------------------");
-      print(authenticated);
+      getUserDetails();
     } catch (e) {
       print("------------------------------------------------------R--------------------------");
       print("error: $e");
@@ -125,7 +140,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
 
   @override
   Widget build(BuildContext context) {
-    if (FirebaseAuth.instance.currentUser != null) {
+    if (userDetails['role'] == "blgu_user") {
       return Scaffold(
         appBar: MainAppBar(),
         body: Container(
