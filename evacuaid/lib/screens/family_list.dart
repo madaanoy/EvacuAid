@@ -116,9 +116,11 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
               Text(
                 'Family Heads',
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
+              ),
+              SizedBox(height: 8,),
               Container(
                         padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
                         decoration: BoxDecoration(
@@ -249,6 +251,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
                   ),
                 ),
               ),
+              SizedBox(height: 16,),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: SizedBox(
@@ -258,7 +261,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
                     onPressed:
                         () => {_showAddFamilyMemberDialog(context, _birthday)},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      backgroundColor: Theme.of(context).colorScheme.tertiary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
                       ),

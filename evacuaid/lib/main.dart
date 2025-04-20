@@ -174,6 +174,7 @@ class _MyAppState extends State<MyApp> {
           onError: Colors.white,
           surface: Color(0xffF4F4F4),
           onSurface: Color(0xff212121),
+          tertiary: Color(0xFF49B445),
           background: Colors.white,
           onBackground: Color(0xff212121),
         ),

@@ -185,9 +185,11 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
               Text(
                 'Evacuation Centers',
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
+              ),
+              SizedBox(height: 8,),
               Container(
                         padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
                         decoration: BoxDecoration(
@@ -326,6 +328,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                   ),
                 ),
               ),
+              SizedBox(height: 16,),
               Row(
                 children: [
                   Expanded(
@@ -335,7 +338,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                         onPressed: () => {showAddEvacCenterDialog(context)},
                         style: FilledButton.styleFrom(
                           backgroundColor:
-                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context).colorScheme.tertiary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -359,7 +362,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                         onPressed: () => {showAddCampManagerDialog(context)},
                         style: FilledButton.styleFrom(
                           backgroundColor:
-                              Theme.of(context).colorScheme.primary,
+                              Theme.of(context).colorScheme.tertiary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4),
                           ),

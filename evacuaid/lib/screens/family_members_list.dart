@@ -155,7 +155,49 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text(
+                  'Legend:',
+                  style: TextStyle(fontSize: 16, ),
+                ),
+                SizedBox(width: 16),
+                    Row(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 16,
+                              height: 16,
+                              color: Theme.of(context).colorScheme.tertiary,
+                              margin: const EdgeInsets.only(right: 8),
+                            ),
+                            const Text('Family Head'),
+                          ],
+                        ),
+                        SizedBox(width: 16),
+                        Row(
+                          children: [
+                            Container(
+                              width: 16,
+                              height: 16,
+                              color: Theme.of(context).colorScheme.onSurface,
+                              margin: const EdgeInsets.only(right: 8),
+                            ),
+                            const Text('Family Member'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
             Expanded(
               child: Container(
                 decoration: BoxDecoration(
@@ -181,7 +223,9 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                         padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
                         decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(8))
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(8),
+                          ),
                         ),
                         child: Row(
                           children: [
@@ -192,8 +236,9 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                                   "Name",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ),
                               ),
                             ),
@@ -204,11 +249,19 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                                   Text(
                                     "Zone",
                                     style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Theme.of(
+                                            context,
+                                          ).colorScheme.onPrimary,
                                     ),
                                   ),
-                                  Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.onPrimary,),
+                                  Icon(
+                                    Icons.arrow_drop_down,
+                                    size: 20,
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                  ),
                                 ],
                               ),
                             ),
@@ -217,9 +270,10 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                               child: Text(
                                 "Contact No.",
                                 style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
                               ),
                             ),
                           ],
@@ -272,12 +326,21 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                                                     style: TextStyle(
                                                       color:
                                                           data[index]['isHead']
-                                                              ? Color(0xFF49B445)
-                                                              : Colors.black,
+                                                              ? Theme.of(
+                                                                    context,
+                                                                  )
+                                                                  .colorScheme
+                                                                  .tertiary
+                                                              : Theme.of(
+                                                                    context,
+                                                                  )
+                                                                  .colorScheme
+                                                                  .onSurface,
                                                       fontWeight:
                                                           data[index]['isHead']
                                                               ? FontWeight.bold
-                                                              : FontWeight.normal,
+                                                              : FontWeight
+                                                                  .normal,
                                                     ),
                                                   ),
                                                 ),
@@ -289,12 +352,15 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                                                     style: TextStyle(
                                                       color:
                                                           data[index]['isHead']
-                                                              ? Color(0xFF49B445)
+                                                              ? Color(
+                                                                0xFF49B445,
+                                                              )
                                                               : Colors.black,
                                                       fontWeight:
                                                           data[index]['isHead']
                                                               ? FontWeight.bold
-                                                              : FontWeight.normal,
+                                                              : FontWeight
+                                                                  .normal,
                                                     ),
                                                   ),
                                                 ),
@@ -306,12 +372,15 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                                                     style: TextStyle(
                                                       color:
                                                           data[index]['isHead']
-                                                              ? Color(0xFF49B445)
+                                                              ? Color(
+                                                                0xFF49B445,
+                                                              )
                                                               : Colors.black,
                                                       fontWeight:
                                                           data[index]['isHead']
                                                               ? FontWeight.bold
-                                                              : FontWeight.normal,
+                                                              : FontWeight
+                                                                  .normal,
                                                     ),
                                                   ),
                                                 ),
@@ -368,31 +437,39 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                 // ),
               ),
             ),
-
             const SizedBox(height: 16),
-            const Text(
-              'Legend',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Row(
-              children: [
-                Container(
-                  width: 20,
-                  height: 20,
-                  color: const Color.fromARGB(255, 73, 180, 69),
-                  margin: const EdgeInsets.only(right: 8),
+            Align(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed:
+                        () => {_showAddFamilyMemberDialog(context, _birthday)},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.tertiary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: Text(
+                      "Add family member",
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    ),
+                  ),
                 ),
-                const Text('Family Head'),
-              ],
-            ),
+              ),
           ],
         ),
       ),
       bottomNavigationBar: const BlguNavbar(1),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddFamilyMemberDialog(context, _birthday),
-        child: const Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: Theme.of(context).colorScheme.tertiary,
+      //   onPressed: () => _showAddFamilyMemberDialog(context, _birthday),
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 
