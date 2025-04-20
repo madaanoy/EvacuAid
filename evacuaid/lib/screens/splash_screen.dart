@@ -1,14 +1,36 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+
+    // Delay for 3 seconds
+    Timer(const Duration(seconds: 3), () {
+      // After 3 seconds, navigate to next screen
+      // If you're using GoRouter:
+      context.go('/login'); // change '/home' to your target route
+      // If you're using Navigator:
+      // Navigator.pushReplacementNamed(context, '/home');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
+        color: Colors.black,
           image: DecorationImage(
             image: AssetImage('assets/images/splash_background.jpg'),
             fit: BoxFit.cover,
@@ -22,41 +44,21 @@ class SplashScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Main Title
-                Text(
-                  'EVACUAID',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: const Color(0xff0438D1),
-                      ),
-                ),
+                Image(
+                  height: 50,
+                  image: AssetImage('assets/logos/logo.png')),
                 const SizedBox(height: 16),
 
                 // Subtitle / Tagline
-                const Text(
+                Text(
                   'In times of calamity, every second counts.\n'
-                  'EvacuAid is here to streamline evacuation efforts,\n'
-                  'ensuring that no one is left behind.',
+                  'EvacuAid is here to streamline evacuation\n'
+                  'efforts, ensuring that no one is left behind.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.w500
+                  ),
                   textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 40),
-
-                // "I'm a BLGU" button
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to BLGU user option screen
-                    context.push('/BLGUlogin');
-                  },
-                  child: const Text("I'm a BLGU"),
-                ),
-
-                const SizedBox(height: 16),
-
-                // "I'm a Camp Manager" button
-                ElevatedButton(
-                  onPressed: () {
-                    // Navigate to Camp Manager user option screen
-                    context.push('/CMlogin');
-                  },
-                  child: const Text("I'm a Camp Manager"),
                 ),
               ],
             ),

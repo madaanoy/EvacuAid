@@ -99,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => context.pop(), // Updated to use GoRouter's pop
+          onPressed: () => context.go('/login'), // Updated to use GoRouter's pop
         ),
       ),
       body: Padding(

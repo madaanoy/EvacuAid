@@ -2,6 +2,7 @@
 import 'dart:math' as developer;
 
 import 'package:evacuaid/auth/campmanager_user_login.dart';
+import 'package:evacuaid/auth/login.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -70,9 +71,9 @@ class _MyAppState extends State<MyApp> {
           name: 'splash',
           path: '/',
           // for dev
-          builder: (context, state) => const BlguFamilyList(),
+          // builder: (context, state) => const BlguFamilyList(),
           // actual
-          // builder: (context, state) => const SplashScreen(),
+          builder: (context, state) => const SplashScreen(),
         ),
         GoRoute(
           name: 'summary',
@@ -114,6 +115,11 @@ class _MyAppState extends State<MyApp> {
           builder: (context, state) => const BlguNotifications(),
         ),
         GoRoute(
+          name: 'login',
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
           name: 'CMlogin',
           path: '/CMlogin',
           builder: (context, state) => const CMLoginScreen(),
@@ -129,28 +135,28 @@ class _MyAppState extends State<MyApp> {
           builder: (context, state) => const RegisterScreen(),
         ),
       ],
-      redirect: (context, state) {
-        // Check if the user is logged in
-        final isLoggedIn = _authService.currentUser != null;
+      // redirect: (context, state) {
+      //   // Check if the user is logged in
+      //   final isLoggedIn = _authService.currentUser != null;
         
-        // Check if we're on login, register, or splash routes
-        final isLoggingIn = state.matchedLocation == '/login';
-        final isRegistering = state.matchedLocation == '/register';
-        final isSplash = state.matchedLocation == '/';
+      //   // Check if we're on login, register, or splash routes
+      //   final isLoggingIn = state.matchedLocation == '/login';
+      //   final isRegistering = state.matchedLocation == '/register';
+      //   final isSplash = state.matchedLocation == '/';
         
-        // Allow access to splash, login and register pages regardless of auth state
-        if (isSplash || isLoggingIn || isRegistering) {
-          return null;
-        }
+      //   // Allow access to splash, login and register pages regardless of auth state
+      //   if (isSplash || isLoggingIn || isRegistering) {
+      //     return null;
+      //   }
 
-        // If not logged in, redirect to login
-        if (!isLoggedIn) {
-          return '/login';
-        }
+      //   // If not logged in, redirect to login
+      //   if (!isLoggedIn) {
+      //     return '/login';
+      //   }
         
-        // No redirection needed
-        return null;
-      },
+      //   // No redirection needed
+      //   return null;
+      // },
       debugLogDiagnostics: true,
     );
   }

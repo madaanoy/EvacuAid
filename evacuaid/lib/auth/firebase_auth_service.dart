@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 
 class FirebaseAuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -10,6 +12,12 @@ class FirebaseAuthService {
 
   // Stream of auth changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  bool? get authenticatedbool => isAuthenticated();
+
+  bool isAuthenticated() {
+    return _auth.currentUser != null;
+  }
 
   // Register with email and password
   Future<UserCredential?> registerWithEmailAndPassword({
@@ -71,8 +79,14 @@ class FirebaseAuthService {
   }
 
   // Sign out
-  Future<void> signOut() async {
+  Future<void> blguSignOut(BuildContext context) async {
     await _auth.signOut();
+    context.go('/BLGUlogin');
+  }
+
+  Future<void> cmSignOut(BuildContext context) async {
+    await _auth.signOut();
+    context.go('/CMlogin');
   }
 
   // Handle Firebase Auth errors

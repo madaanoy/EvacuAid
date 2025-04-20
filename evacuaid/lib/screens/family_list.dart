@@ -9,6 +9,7 @@ This is where you can add evacuation centers or kabarangay shelters.
 import 'dart:collection';
 import 'dart:developer' as developer;
 import 'dart:math';
+import 'package:evacuaid/auth/firebase_auth_service.dart';
 import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -43,12 +44,31 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
   final _zoneController = TextEditingController();
   final _contactNumberController = TextEditingController();
   final _birthdayController = TextEditingController();
-  String? _selectedFamilyType;
-  DateTime? _birthday;
-  String? id;
   final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
     list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
   );
+  final _authService= FirebaseAuthService();
+
+  User? user;
+  bool? authenticated;
+  String? _selectedFamilyType;
+  DateTime? _birthday;
+  String? id;
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      authenticated =  _authService.authenticatedbool;
+      user = _authService.currentUser;
+    
+      print("--------------------------------------------------------------------------------");
+      print(authenticated);
+    } catch (e) {
+      print("------------------------------------------------------R--------------------------");
+      print("error: $e");
+    }
+  }
 
   @override
   void dispose() {
