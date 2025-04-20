@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:evacuaid/auth/firebase_auth_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class CMLoginScreen extends StatefulWidget {
+  const CMLoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<CMLoginScreen> createState() => _CMLoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _CMLoginScreenState extends State<CMLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = FirebaseAuthService();

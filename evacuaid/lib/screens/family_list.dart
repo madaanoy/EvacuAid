@@ -1,123 +1,293 @@
+/* Authored by: Raymund Joseph M. Rosco
+Company: Patent Pending
+Project: EvacuAid
+Feature: [EVA-58] [DEV] Estalbish Evacuation Screen
+Description: Ticket [EVA-42]'[UI] Establish Evaciation Screen' must be coded. 
+This is where you can add evacuation centers or kabarangay shelters.
+*/
+
+import 'dart:collection';
+import 'dart:developer' as developer;
+import 'dart:math';
+import 'package:flutter_datetime_picker_plus/flutter_datetime_picker_plus.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evacuaid/widgets/CustomDropDown.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../widgets/blgunavbar.dart';
 import '../widgets/mainappbar.dart';
 
-class BlguFamilyList extends StatelessWidget {
+const List<String> list = <String>[
+  'Select Family Type',
+  'Grandfather',
+  'Grandmother',
+  'Father',
+  'Mother',
+  'Daughter',
+  'Son',
+  'N/a',
+];
+
+class BlguFamilyList extends StatefulWidget {
   const BlguFamilyList({super.key});
 
   @override
+  State<BlguFamilyList> createState() => _BlguFamilyListState();
+}
+
+class _BlguFamilyListState extends State<BlguFamilyList> {
+  final _lastnameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _zoneController = TextEditingController();
+  final _contactNumberController = TextEditingController();
+  final _birthdayController = TextEditingController();
+  String? _selectedFamilyType;
+  DateTime? _birthday;
+  String? id;
+  final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
+    list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
+  );
+
+  @override
+  void dispose() {
+    _lastnameController.dispose();
+    _firstNameController.dispose();
+    _contactNumberController.dispose();
+    _birthdayController.dispose();
+    _birthday = null;
+    _selectedFamilyType = null;
+    super.dispose();
+  }
+
+  void refresh() {
+    setState(() {});
+  }
+
+  Future<void> _addFamily() async {
+    try {
+      if (_firstNameController.text.isEmpty ||
+          _lastnameController.text.isEmpty ||
+          _contactNumberController.text.isEmpty ||
+          _birthdayController.text.isEmpty ||
+          _selectedFamilyType == null) {
+        _dialogBuilder(context, 'Complete all fields', 'Please fill-up all fields, you may have\n left some fields blank or have wrong inputs.');
+        throw 'Please fill in all fields';
+      }
+
+      setState(() {});
+
+      CollectionReference brgyMembers = FirebaseFirestore.instance.collection(
+        'brgyMembers',
+      );
+
+      DocumentReference brgyMembersRef = await brgyMembers.add({
+        "firstName": _firstNameController.text.trim(),
+        "lastName": _lastnameController.text.trim(),
+        "contactNumber": _contactNumberController.text.trim(),
+        "zone": int.parse(_zoneController.text.trim()),
+        "memberType": _selectedFamilyType,
+        "birthday": _birthday,
+        "isHead": true,
+        "dateRegistered": DateTime.now(),
+      });
+
+      FirebaseFirestore.instance.collection("families").add({
+        "dateRegistered": DateTime.now(),
+        "head": brgyMembersRef.id,
+        "members": [],
+      });
+
+      id = brgyMembersRef.id;
+    } catch (e) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const MainAppBar(),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Family Members',
-              style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12), // Rounded corners
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
-                      spreadRadius: 1,
-                      blurRadius: 3,
-                      offset: const Offset(0, 1),
-                    ),
-                  ],
+    if (FirebaseAuth.instance.currentUser != null) {
+      return Scaffold(
+        appBar: MainAppBar(),
+        body: Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Family Heads',
+                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    12,
-                  ), // Ensure clipping to round corners
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: DataTable(
-                      columnSpacing: 24,
-                      dataRowHeight: 48,
-                      headingRowHeight: 48,
-                      headingRowColor: WidgetStateProperty.resolveWith(
-                        (states) => const Color.fromARGB(255, 4, 55, 209),
-                      ),
-                      columns: const [
-                        DataColumn(label: CenteredHeaderText('Last Name')),
-                        DataColumn(label: CenteredHeaderText('First Name')),
-                        DataColumn(label: CenteredHeaderText('Contact No.')),
-                      ],
-                      rows: [
-                        _buildDataRow(
-                          'Daanoy',
-                          'Michael Angelo',
-                          '09498014593',
-                          isHead: true,
+              ),
+              Container(
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(8))
                         ),
-                        _buildDataRow('Daanoy', 'Juana', '0929401593'),
-                        _buildDataRow('Daanoy', 'Kevin', '...'),
-                        _buildDataRow('Daanoy', 'Erin', '...'),
-                        _buildDataRow('Daanoy', 'Angelo', '...'),
-                      ],
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                child: Text(
+                                  "Name",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onPrimary
+                                    ),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Zone",
+                                    style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context).colorScheme.onPrimary
+                                    ),
+                                  ),
+                                  Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.onPrimary,),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                    borderRadius: BorderRadius.all(Radius.circular(8)),
+                  ),
+                  child: Column(
+                    children: [
+                      FutureBuilder(
+                        future:
+                            FirebaseFirestore.instance
+                                .collection("brgyMembers")
+                                .get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+                          if (!snapshot.hasData) {
+                            return Text("There is no data");
+                          }
+                          return (Expanded(
+                            child: ListView.builder(
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (context, index) {
+                                if (snapshot.data!.docs[index]
+                                        .data()['isHead'] ==
+                                    true) {
+                                  return Column(
+                                    children: [
+                                      InkWell(
+                                        onTap:
+                                            () => {
+                                              context.go(
+                                                '/families/familyMembers/${snapshot.data!.docs[index].id}',
+                                                // '/familyMembers',
+                                              ),
+                                            },
+                                        child: Container(
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                color:
+                                                    Theme.of(
+                                                      context,
+                                                    ).colorScheme.onSurface,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 2,
+                                                child: Text(
+                                                  snapshot.data!.docs[index]
+                                                          .data()['lastName'] +
+                                                      ', ' +
+                                                      snapshot.data!.docs[index]
+                                                          .data()['firstName'],
+                                                ),
+                                              ),
+                                              Expanded(
+                                                flex: 1,
+                                                child: Text(
+                                                  snapshot.data!.docs[index]
+                                                      .data()['zone']
+                                                      .toString(),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 18),
+                                    ],
+                                  );
+                                } else {
+                                  return const SizedBox.shrink();
+                                }
+                              },
+                            ),
+                          ));
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed:
+                        () => {_showAddFamilyMemberDialog(context, _birthday)},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: Text(
+                      "Add a new family",
+                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-
-            const SizedBox(height: 16),
-            const Text(
-              'Legend',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Row(
-              children: [
-                Container(
-                  width: 20,
-                  height: 20,
-                  color: const Color.fromARGB(255, 73, 180, 69),
-                  margin: const EdgeInsets.only(right: 8),
-                ),
-                const Text('Family Head'),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: const BlguNavbar(1),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddFamilyMemberDialog(context),
-        child: const Icon(Icons.add),
-      ),
-    );
+        bottomNavigationBar: const BlguNavbar(1),
+      );
+      // signed in
+    } else {
+      return Scaffold(
+        appBar: MainAppBar(),
+        body: Text("Please login"),
+        bottomNavigationBar: const BlguNavbar(1),
+      );
+    }
   }
 
-  DataRow _buildDataRow(
-    String lastName,
-    String firstName,
-    String contactNo, {
-    bool isHead = false,
-  }) {
-    final textColor = isHead ? const Color(0xFF49B445) : Colors.black;
-    final fontWeight = isHead ? FontWeight.bold : FontWeight.normal;
-
-    return DataRow(
-      cells: [
-        DataCell(CenteredText(lastName, textColor, fontWeight)),
-        DataCell(CenteredText(firstName, textColor, fontWeight)),
-        DataCell(CenteredText(contactNo, textColor, fontWeight)),
-      ],
-    );
-  }
-
-  void _showAddFamilyMemberDialog(BuildContext context) {
+  void _showAddFamilyMemberDialog(BuildContext context, DateTime? bday) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -136,13 +306,73 @@ class BlguFamilyList extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Add Family Member',
+                'Add Family Head Details',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
-              _buildInputField('Last Name'),
-              _buildInputField('First Name'),
-              _buildInputField('Contact No.', isPhone: true),
+              _buildInputField('Last Name', _lastnameController),
+              _buildInputField('First Name', _firstNameController),
+              _buildInputField('Zone', _zoneController),
+              _buildInputField(
+                'Contact No.',
+                _contactNumberController,
+                isPhone: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: TextField(
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? dateTime = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+
+                    if (dateTime != null) {
+                      _birthday = dateTime;
+                      String formattedDate = DateFormat(
+                        'yyyy-MM-dd',
+                      ).format(dateTime);
+
+                      setState(() {
+                        _birthdayController.text = formattedDate;
+                      });
+                    }
+                  },
+                  controller: _birthdayController,
+                  decoration: InputDecoration(
+                    labelText: "Input Birthday",
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              DropdownMenu<String>(
+                expandedInsets: EdgeInsets.zero,
+                initialSelection: list.first,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                ),
+                onSelected: (String? value) {
+                  setState(() {
+                    _selectedFamilyType = value!;
+                  });
+                },
+                dropdownMenuEntries: menuEntries,
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -153,7 +383,12 @@ class BlguFamilyList extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed:
+                        () => {
+                          _addFamily(),
+                          setState(() {}),
+                          Navigator.pop(context),
+                        },
                     child: const Text('Save'),
                   ),
                 ],
@@ -165,16 +400,50 @@ class BlguFamilyList extends StatelessWidget {
     );
   }
 
-  Widget _buildInputField(String label, {bool isPhone = false}) {
+  Widget _buildInputField(
+    String label,
+    TextEditingController controller, {
+    bool isPhone = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: TextFormField(
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+              return 'Please fill-up all fields.';
+            }
+          return null;
+        },
+        controller: controller,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
         ),
         keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
       ),
+    );
+  }
+
+  Future<void> _dialogBuilder(BuildContext context, String title, String content) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

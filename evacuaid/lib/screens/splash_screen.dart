@@ -43,7 +43,7 @@ class SplashScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Navigate to BLGU user option screen
-                    context.push('/blgu_option');
+                    context.push('/BLGUlogin');
                   },
                   child: const Text("I'm a BLGU"),
                 ),
@@ -54,7 +54,7 @@ class SplashScreen extends StatelessWidget {
                 ElevatedButton(
                   onPressed: () {
                     // Navigate to Camp Manager user option screen
-                    context.push('/campmanager_option');
+                    context.push('/CMlogin');
                   },
                   child: const Text("I'm a Camp Manager"),
                 ),

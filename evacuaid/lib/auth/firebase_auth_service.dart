@@ -96,4 +96,20 @@ class FirebaseAuthService {
         return 'An error occurred. Please try again.';
     }
   }
+Future<UserCredential?> registerCampManagerWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      // Create user with email and password
+      final userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthError(e);
+    }
+  }
 }

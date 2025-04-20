@@ -1,10 +1,12 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
 
-const List<String> list = <String>['Add Camp Manager'];
+// const List<String> list = <String>['Add Camp Manager'];
 
 class CustomDropDown extends StatefulWidget {
-  const CustomDropDown({super.key});
+  final List<String> list;
+  final String hint;
+  const CustomDropDown({super.key, required this.list, required this.hint});
 
   @override
   State<CustomDropDown> createState() => _CustomDropDownState();
@@ -13,13 +15,13 @@ class CustomDropDown extends StatefulWidget {
 typedef MenuEntry = DropdownMenuEntry<String>;
 
 class _CustomDropDownState extends State<CustomDropDown> {
-  static final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
-    list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
-  );
-  String dropdownValue = list.first;
 
   @override
   Widget build(BuildContext context) {
+  String dropdownValue = "Select Family Type";
+  final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
+    widget.list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
+  );
     return DropdownMenu<String>(
       expandedInsets: EdgeInsets.zero,
       inputDecorationTheme: InputDecorationTheme(
@@ -33,7 +35,6 @@ class _CustomDropDownState extends State<CustomDropDown> {
           color: Theme.of(context).colorScheme.surfaceContainerLow,
         ),
       ),
-      hintText: dropdownValue,
       onSelected: (String? value) {
         setState(() {
           dropdownValue = value!;

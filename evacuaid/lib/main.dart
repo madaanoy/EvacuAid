@@ -1,4 +1,7 @@
 // Important Packages
+import 'dart:math' as developer;
+
+import 'package:evacuaid/auth/campmanager_user_login.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -8,10 +11,9 @@ import 'dart:async';
 
 // Imported Screens
 import 'package:evacuaid/auth/blgu_user_login.dart';
-import 'package:evacuaid/screens/blgu_user_option.dart';
 import 'package:evacuaid/auth/blgu_user_register.dart';
-import 'package:evacuaid/screens/campmanager_user_option.dart';
 import 'package:evacuaid/screens/create_evac_center.dart';
+import 'package:evacuaid/screens/family_members_list.dart';
 import 'package:evacuaid/screens/family_list.dart';
 import 'package:evacuaid/screens/evac_center_list.dart';
 import 'package:evacuaid/screens/notifications.dart';
@@ -67,7 +69,10 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           name: 'splash',
           path: '/',
-          builder: (context, state) => const SplashScreen(),
+          // for dev
+          builder: (context, state) => const BlguFamilyList(),
+          // actual
+          // builder: (context, state) => const SplashScreen(),
         ),
         GoRoute(
           name: 'summary',
@@ -78,6 +83,18 @@ class _MyAppState extends State<MyApp> {
           name: 'families',
           path: '/families',
           builder: (context, state) => const BlguFamilyList(),
+          routes: <RouteBase>[
+            GoRoute(
+              name: 'familyMembers',
+              // path: '/familyMembers',
+              path: '/familyMembers/:id',
+              builder: (context, state) {
+                // return BlguFamilyMembersList();
+                final memberId = state.pathParameters['id'];
+                return BlguFamilyMembersList(id: memberId!);
+              },
+            ),
+          ]
         ),
         GoRoute(
           name: 'centers',
@@ -97,19 +114,14 @@ class _MyAppState extends State<MyApp> {
           builder: (context, state) => const BlguNotifications(),
         ),
         GoRoute(
-          name: 'blgu_option',
-          path: '/blgu_option',
-          builder: (context, state) => const BLGUScreen(),
+          name: 'CMlogin',
+          path: '/CMlogin',
+          builder: (context, state) => const CMLoginScreen(),
         ),
         GoRoute(
-          name: 'campmanager_option',
-          path: '/campmanager_option',
-          builder: (context, state) => const CampManagerScreen(),
-        ),
-        GoRoute(
-          name: 'login',
-          path: '/login',
-          builder: (context, state) => const LoginScreen(),
+          name: 'BLGUlogin',
+          path: '/BLGUlogin',
+          builder: (context, state) => const BLGULoginScreen(),
         ),
         GoRoute(
           name: 'register',
@@ -149,6 +161,7 @@ class _MyAppState extends State<MyApp> {
       routerConfig: _router,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white,
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
           primary: Color(0xff0438D1),
@@ -159,7 +172,7 @@ class _MyAppState extends State<MyApp> {
           onSecondary: Colors.white,
           error: Color(0xffff3333),
           onError: Colors.white,
-          surface: Colors.white,
+          surface: Color(0xffF4F4F4),
           onSurface: Color(0xff212121),
           background: Colors.white,
           onBackground: Color(0xff212121),

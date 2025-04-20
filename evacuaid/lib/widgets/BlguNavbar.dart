@@ -48,7 +48,7 @@ class BlguNavbar extends StatelessWidget {
         onTap: (int index) {
           switch (index) {
             case 0:
-              context.go('/');
+              context.go('/summary');
               break;
             case 1:
               context.go('/families');
