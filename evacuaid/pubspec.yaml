@@ -44,6 +44,7 @@ dependencies:
   intl: ^0.20.2
 
 dev_dependencies:
+  fl_chart: 0.63.0
   flutter_test:
     sdk: flutter
 
