@@ -51,14 +51,17 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
   final _authService = FirebaseAuthService();
   int? _campManagerIndex;
   String? _campManager;
+  String? _campManagerID;
+  String? campManagerName;
 
   final _formKey = GlobalKey<FormState>();
 
-  List<Map<String, dynamic>> campManagers = [];
   List<String> campManagerNames = <String>[];
+  List<Map<String, dynamic>> campManagers = [];
   List<MenuEntry> menuEntries = [];
 
   Future<void> fetchCampManagers() async {
+    Future.delayed(Duration(seconds: 2));
     QuerySnapshot campManagerSnapshot =
         await FirebaseFirestore.instance.collection('users').get();
 
@@ -66,20 +69,34 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
     menuEntries.clear();
 
     for (var doc in campManagerSnapshot.docs) {
-      print(doc);
       if ((doc['role']) == "camp_manager_user") {
         if (doc['assigned'] == false) {
-          campManagers.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
+          campManagers.add({
+            'id': doc.id,
+            ...doc.data() as Map<String, dynamic>,
+          });
           campManagerNames.add(doc['firstName'] + ' ' + doc['lastName']);
         }
       }
     }
 
     setState(() {
-    menuEntries = campManagerNames.map<MenuEntry>(
-        (String name) => MenuEntry(value: name, label: name),
-      ).toList();
+      menuEntries =
+          campManagers
+              .map<MenuEntry>(
+                (e) => MenuEntry(
+                  value: e['id'],
+                  label: e['firstName'] + ' ' + e['lastName'],
+                ),
+              )
+              .toList();
     });
+  }
+
+  Future<String> getCampManagerName(cmId) async {
+    final DocumentSnapshot doc =
+        await FirebaseFirestore.instance.collection('users').doc(cmId).get();
+    return doc['firstName'] + ' ' + doc['lastName'];
   }
 
   @override
@@ -101,11 +118,35 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
     super.dispose();
   }
 
-  void refresh() {
-    setState(() {});
+  Future<void> _addEvacCenter() async {
+    try {
+      if (_nameController.text.isEmpty ||
+          _zoneController.text.isEmpty ||
+          _campManagerID == null) {
+        _dialogBuilder(context);
+        throw 'Please fill in all fields';
+      }
+      CollectionReference evacCenter = FirebaseFirestore.instance.collection(
+        'evacCenter',
+      );
+      // DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(_campManager).get();
+
+      DocumentReference evacCenterRef = await evacCenter.add({
+        "name": _nameController.text.trim(),
+        "zone": int.parse(_zoneController.text.trim()),
+        "campManager": _campManagerID,
+        "dateRegistered": DateTime.now(),
+      });
+
+      FirebaseFirestore.instance.collection("users").doc(_campManager).update({
+        "assigned": true,
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
-  Future<void> _addEvacCenter() async {
+  Future<void> _updateEvacCenter(id) async {
     try {
       if (_nameController.text.isEmpty ||
           _zoneController.text.isEmpty ||
@@ -113,21 +154,10 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
         _dialogBuilder(context);
         throw 'Please fill in all fields';
       }
-
-      CollectionReference evacCenter = FirebaseFirestore.instance.collection(
-        'evacCenter',
-      );
-
-      DocumentReference evacCenterRef = await evacCenter.add({
+      await FirebaseFirestore.instance.collection('evacCenter').doc(id).update({
         "name": _nameController.text.trim(),
-        "zone": int.parse(_zoneController.text.trim()),
-        "campManager": _campManager,
-        "dateRegistered": DateTime.now(),
-      });
-
-      final cmId = campManagers[_campManagerIndex!]['id'];
-      FirebaseFirestore.instance.collection("campManager").doc(cmId).update({
-        "assigned": true,
+        "zone": _zoneController.text.trim(),
+        "campManager": _campManagerID
       });
     } catch (e) {
       print(e);
@@ -163,13 +193,27 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
         "contactNumber": _contactNumberController.text.trim(),
         "dateRegistered": DateTime.now(),
         "assigned": false,
-        "role": "camp_manager_user"
+        "role": "camp_manager_user",
       });
-      
+
+      fetchCampManagers();
       setState(() {});
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> deleteEvacCenter(id, userID) async {
+    await FirebaseFirestore.instance.collection('users').doc(userID).update({
+      'assigned': false
+    });
+
+    await FirebaseFirestore.instance.collection('evacCenter').doc(id).delete();
+
+    setState(() {
+      
+    });
+    Navigator.pop(context);
   }
 
   @override
@@ -185,65 +229,71 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
               Text(
                 'Evacuation Centers',
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              ),
-              SizedBox(height: 8,),
+              SizedBox(height: 8),
               Container(
-                        padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(8))
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                child: Text(
-                                  "Name",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "Zone",
-                                    style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
-                                  ),
-                                  Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.onPrimary,),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                "Camp Manager",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
-                              ),
-                            ),
-                          ],
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        child: Text(
+                          "Name",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Text(
+                            "Zone",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        "Camp Manager",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.vertical(bottom: Radius.circular(8)),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(8),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -266,15 +316,16 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                             child: ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
+                                print(
+                                  '----------------------------------------------------------------------',
+                                );
+                                print(snapshot.data!.docs[index].data());
                                 return Column(
                                   children: [
                                     InkWell(
                                       onTap:
                                           () => {
-                                            context.go(
-                                              '/familyMembers/${snapshot.data!.docs[index].id}',
-                                              // '/familyMembers',
-                                            ),
+                                            showEditEvacCenterDialog(context, snapshot.data!.docs[index].id)
                                           },
                                       child: Container(
                                         height: 36,
@@ -307,9 +358,39 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                                             ),
                                             Expanded(
                                               flex: 2,
-                                              child: Text(
-                                                snapshot.data!.docs[index]
-                                                    .data()['campManager'],
+                                              // edit here
+                                              child: FutureBuilder(
+                                                future:
+                                                    FirebaseFirestore.instance
+                                                        .collection('users')
+                                                        .doc(
+                                                          snapshot
+                                                              .data!
+                                                              .docs[index]
+                                                              .data()['campManager'],
+                                                        )
+                                                        .get(),
+                                                builder: (context, snapshot) {
+                                                  if (snapshot
+                                                          .connectionState ==
+                                                      ConnectionState.waiting) {
+                                                    return const Center(
+                                                      child:
+                                                          CircularProgressIndicator(),
+                                                    );
+                                                  }
+                                                  if (!snapshot.hasData) {
+                                                    return Text(
+                                                      "There is no data",
+                                                    );
+                                                  }
+                                                  return Text(
+                                                    snapshot.data!['firstName'] +
+                                                        ' ' +
+                                                        snapshot
+                                                            .data!['lastName'],
+                                                  );
+                                                },
                                               ),
                                             ),
                                           ],
@@ -328,7 +409,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                   ),
                 ),
               ),
-              SizedBox(height: 16,),
+              SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
@@ -345,30 +426,6 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                         ),
                         child: Text(
                           "Add Evac. Center",
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(
-                    child: SizedBox(
-                      height: 48,
-                      child: FilledButton(
-                        onPressed: () => {showAddCampManagerDialog(context)},
-                        style: FilledButton.styleFrom(
-                          backgroundColor:
-                              Theme.of(context).colorScheme.tertiary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        child: Text(
-                          "Add Camp Manager",
                           style: Theme.of(
                             context,
                           ).textTheme.titleSmall!.copyWith(
@@ -397,6 +454,10 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
 
   void showAddEvacCenterDialog(BuildContext context) async {
     await fetchCampManagers;
+
+    _nameController.clear();
+    _zoneController.clear();
+    Future.delayed(Duration(seconds: 2));
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -426,44 +487,42 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                     _buildInputField('Name', _nameController),
                     _buildInputField('Zone', _zoneController),
                   ],
-                )),
-                    DropdownMenu<String>(
-                      initialSelection: null,
-                      enabled: campManagerNames.isEmpty ? false : true,
-                      hintText:
-                          campManagerNames.isEmpty
-                              ? 'Please add a Camp Manager first'
-                              : 'Select Camp Manager',
-                      expandedInsets: EdgeInsets.zero,
-                      inputDecorationTheme: InputDecorationTheme(
-                        filled: true,
-                        fillColor:
-                            campManagerNames.isEmpty
-                                ? Theme.of(context).colorScheme.error
-                                : Theme.of(context).colorScheme.surface,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Theme.of(context).colorScheme.outline,
-                          ),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        hintStyle: TextStyle(
-                          color:
-                              campManagerNames.isEmpty
-                                  ? Colors.white
-                                  : Colors.black,
-                        ),
-                      ),
-                      onSelected: (String? value) {
-                        setState(() {
-                          _campManagerIndex = campManagerNames.indexOf(value!);
-                          _campManager = value;
-                        });
-                      },
-                      dropdownMenuEntries: menuEntries,
+                ),
+              ),
+              DropdownMenu<String>(
+                initialSelection: null,
+                enabled: campManagerNames.isEmpty ? false : true,
+                hintText:
+                    campManagerNames.isEmpty
+                        ? 'Please add a Camp Manager first'
+                        : 'Select Camp Manager',
+                expandedInsets: EdgeInsets.zero,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor:
+                      campManagerNames.isEmpty
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.surface,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
                     ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color:
+                        campManagerNames.isEmpty ? Colors.white : Colors.black,
+                  ),
+                ),
+                onSelected: (String? name) {
+                  setState(() {
+                    _campManagerID = name;
+                  });
+                },
+                dropdownMenuEntries: menuEntries,
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -492,7 +551,82 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
     );
   }
 
-  void showAddCampManagerDialog(BuildContext context) {
+  Future<void> showDeleteModal(id, userID) async {
+    try {
+      await showDialog(
+        context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Are you sure you want to delete the evacuation center?"),
+          content: Text("This will permanently delete it."),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Yes'),
+              onPressed: () {
+                deleteEvacCenter(id, userID);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    } catch (e) {
+      print('Error deleting document: $e');
+    }
+  }
+
+  void showEditEvacCenterDialog(BuildContext context, id) async {
+    DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance.collection('evacCenter').doc(id).get();
+    Map<String, dynamic>? data = documentSnapshot.data() as Map<String, dynamic>?;
+    DocumentSnapshot cmDocumentSnapshot = await FirebaseFirestore.instance.collection('users').doc(data?['campManager']).get();
+    Map<String, dynamic>? cmData = cmDocumentSnapshot.data() as Map<String, dynamic>?;
+    String cmName = cmData?['firstName'] + ' ' + cmData?['lastName'];
+    QuerySnapshot campManagerSnapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+
+    List<MenuEntry> newMenuEntries = List.from(menuEntries);
+
+    newMenuEntries.add(
+      MenuEntry(
+      value: cmDocumentSnapshot.id,
+      label: cmName));
+
+    campManagerNames.clear();
+    campManagerNames.add(cmName);
+
+    for (var doc in campManagerSnapshot.docs) {
+      print(doc);
+      if ((doc['role']) == "camp_manager_user") {
+        if (doc['assigned'] == false) {
+          campManagers.add({
+            'id': doc.id,
+            ...doc.data() as Map<String, dynamic>,
+          });
+          campManagerNames.add(doc['firstName'] + ' ' + doc['lastName']);
+        }
+      }
+    }
+
+    print(campManagerNames);
+
+    setState(() {
+      _nameController.value = _nameController.value.copyWith(text: data?['name']);
+      _zoneController.value = _zoneController.value.copyWith(text: data?['zone'].toString());
+      _campManager = cmName;
+    });
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -511,7 +645,7 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Add Camp Manager',
+                'Edit Evacuation Center',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -519,41 +653,75 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    _buildInputField('First Name', _firstNameController),
-                    _buildInputField('Last Name', _lastNameController),
-                    _buildInputField('Email', _emailController, isEmail: true),
-                    _buildInputField(
-                      'Password',
-                      _passwordController,
-                      isPassword: true,
-                    ),
-                    _buildInputField(
-                      'Confirm Password',
-                      _confirmPasswordController,
-                      isPassword: true,
-                    ),
-                    _buildInputField('Phone Number', _contactNumberController),
-                    _buildInputField('Zone', _zoneCMController),
+                    _buildInputField('Name', _nameController),
+                    _buildInputField('Zone', _zoneController),
                   ],
                 ),
               ),
+              DropdownMenu<String>(
+                initialSelection: null,
+                enabled: campManagerNames.isEmpty ? false : true,
+                hintText:
+                    campManagerNames.isEmpty
+                        ? 'Please add a Camp Manager first'
+                        : _campManager,
+                expandedInsets: EdgeInsets.zero,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor:
+                      campManagerNames.isEmpty
+                          ? Theme.of(context).colorScheme.error
+                          : Theme.of(context).colorScheme.surface,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color:
+                        campManagerNames.isEmpty ? Colors.white : Colors.black,
+                  ),
+                ),
+                onSelected: (String? name) {
+                  setState(() {
+                    _campManagerID = name;
+                  });
+                },
+                dropdownMenuEntries: newMenuEntries,
+              ),
               const SizedBox(height: 20),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel'),
-                  ),
+                        onPressed: () async {
+                          await showDeleteModal(id, data?['campManager']);
+                        },
+                        child: const Text('Delete',
+                        style: TextStyle(color: Color(0xffff3333)),
+                      )),
+                      const SizedBox(width: 8),
+                  Row(
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        await _addCampManager();
+                        _updateEvacCenter(id);
+                        setState(() {});
                         Navigator.pop(context);
-                      } 
+                      }
                     },
                     child: const Text('Save'),
+                  ),
+                    ],
                   ),
                 ],
               ),
@@ -563,6 +731,78 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
       },
     );
   }
+
+  // void showAddCampManagerDialog(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+  //     ),
+  //     builder: (context) {
+  //       return Padding(
+  //         padding: EdgeInsets.only(
+  //           left: 16.0,
+  //           right: 16.0,
+  //           top: 16.0,
+  //           bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+  //         ),
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           children: [
+  //             const Text(
+  //               'Add Camp Manager',
+  //               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  //             ),
+  //             const SizedBox(height: 16),
+  //             Form(
+  //               key: _formKey,
+  //               child: Column(
+  //                 children: [
+  //                   _buildInputField('First Name', _firstNameController),
+  //                   _buildInputField('Last Name', _lastNameController),
+  //                   _buildInputField('Email', _emailController, isEmail: true),
+  //                   _buildInputField(
+  //                     'Password',
+  //                     _passwordController,
+  //                     isPassword: true,
+  //                   ),
+  //                   _buildInputField(
+  //                     'Confirm Password',
+  //                     _confirmPasswordController,
+  //                     isPassword: true,
+  //                   ),
+  //                   _buildInputField('Phone Number', _contactNumberController),
+  //                   _buildInputField('Zone', _zoneCMController),
+  //                 ],
+  //               ),
+  //             ),
+  //             const SizedBox(height: 20),
+  //             Row(
+  //               mainAxisAlignment: MainAxisAlignment.end,
+  //               children: [
+  //                 TextButton(
+  //                   onPressed: () => Navigator.pop(context),
+  //                   child: const Text('Cancel'),
+  //                 ),
+  //                 const SizedBox(width: 8),
+  //                 ElevatedButton(
+  //                   onPressed: () async {
+  //                     if (_formKey.currentState!.validate()) {
+  //                       await _addCampManager();
+  //                       Navigator.pop(context);
+  //                     }
+  //                   },
+  //                   child: const Text('Save'),
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
 
   Widget _buildInputField(
     String label,

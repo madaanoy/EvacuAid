@@ -1,3 +1,12 @@
+/* Authored by: Michael Angelo M. Daanoy
+Company: Patent Pending
+Project: EvacuAid
+Feature: [EVA-56] [DEV] Registration Screen
+Description: The user must be able to input the mail of their BLGU, their contact number, barangay,
+municipality/city, and password (and confirm their password). It must also have a 'Register' button and 
+a return to login button.
+*/
+
 import 'package:flutter/material.dart';
 import 'package:evacuaid/auth/firebase_auth_service.dart';
 import 'package:go_router/go_router.dart';
@@ -15,7 +24,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String? _selectedBarangay;
-  String? _selectedProvince;
+  String? _selectedMunicipality;
   bool _isLoading = false;
   String? _errorMessage;
 
@@ -53,7 +62,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           _contactNumberController.text.isEmpty ||
           _passwordController.text.isEmpty ||
           _selectedBarangay == null ||
-          _selectedProvince == null) {
+          _selectedMunicipality == null) {
         throw 'Please fill in all fields';
       }
 
@@ -64,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: _passwordController.text.trim(),
         contactNumber: _contactNumberController.text.trim(),
         barangay: _selectedBarangay!,
-        province: _selectedProvince!,
+        municipality: _selectedMunicipality!,
         oathOfOfficeUrl: '',
       );
 
@@ -207,7 +216,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 const SizedBox(height: 16),
 
-                // Barangay and Province dropdowns
+                // Barangay and municipality dropdowns
                 Row(
                   children: [
                     Expanded(
@@ -286,7 +295,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButtonFormField<String>(
-                                value: _selectedProvince,
+                                value: _selectedMunicipality,
                                 hint: Text('Select'),
                                 isExpanded: true,
                                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -300,12 +309,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 }).toList(),
                                 onChanged: (String? newValue) {
                                   setState(() {
-                                    _selectedProvince = newValue;
+                                    _selectedMunicipality = newValue;
                                   });
                                 },
                                 validator: (value) {
                                   if (value == null) {
-                                    return 'Please select a province';
+                                    return 'Please select a municipality';
                                   }
                                   return null;
                                 },

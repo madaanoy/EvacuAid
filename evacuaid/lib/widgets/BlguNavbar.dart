@@ -36,8 +36,8 @@ class BlguNavbar extends StatelessWidget {
             label: 'Centers',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_active_rounded),
-            label: 'Notifications',
+            icon: Icon(Icons.person_pin),
+            label: 'Camp Managers',
           ),
         ],
         currentIndex: activeIndex,
@@ -57,7 +57,7 @@ class BlguNavbar extends StatelessWidget {
               context.go('/centers');
               break;
             case 3:
-              context.go('/notifications');
+              context.go('/camp_manager');
               break;
             default:
           }

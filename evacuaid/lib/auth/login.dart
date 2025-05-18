@@ -1,3 +1,12 @@
+/* Authored by: Michael Angelo M. Daanoy
+Company: Patent Pending
+Project: EvacuAid
+Feature: [EVA-56] [DEV] Login Screen
+Description: The user must be able to input the mail of their BLGU, their contact number, barangay,
+municipality/city, and password (and confirm their password). It must also have a 'Register' button and 
+a return to login button.
+*/
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:evacuaid/auth/firebase_auth_service.dart';
@@ -48,6 +57,7 @@ class LoginScreenState extends State<LoginScreen> {
       setState(() {
         _errorMessage = e.toString();
       });
+      print(_errorMessage);
     } finally {
       if (mounted) {
         setState(() {

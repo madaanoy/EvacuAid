@@ -65,6 +65,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
     for (var doc in snapshot.docs) {
       if (doc['email'] == await user?.email) {
         userDetails = {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+        print(userDetails['barangay']);
         break;
       }
     }
@@ -80,7 +81,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
       user = _authService.currentUser;
       getUserDetails();
     } catch (e) {
-      print("------------------------------------------------------R--------------------------");
+      print("----------ERROR----------");
       print("error: $e");
     }
   }
@@ -125,13 +126,14 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
         "memberType": _selectedFamilyType,
         "birthday": _birthday,
         "isHead": true,
+        "barangay": userDetails['barangay'],
+        "municipality": userDetails['municipality'],
         "dateRegistered": DateTime.now(),
       });
 
       FirebaseFirestore.instance.collection("families").add({
         "dateRegistered": DateTime.now(),
-        "head": brgyMembersRef.id,
-        "members": [],
+        "members": [brgyMembersRef.id],
       });
 
       id = brgyMembersRef.id;
@@ -222,9 +224,11 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
                             child: ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
-                                if (snapshot.data!.docs[index]
-                                        .data()['isHead'] ==
-                                    true) {
+                                print(snapshot.data!.docs[index].data()['barangay'] == userDetails['barangay']);
+                                if (snapshot.data!.docs[index].data()['isHead'] == true 
+                                && snapshot.data!.docs[index].data()['barangay'] == userDetails['barangay']
+                                && snapshot.data!.docs[index].data()['municipality'] == userDetails['municipality']
+                                ) {
                                   return Column(
                                     children: [
                                       InkWell(

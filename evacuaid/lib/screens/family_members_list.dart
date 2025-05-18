@@ -1,13 +1,21 @@
-import 'dart:collection';
+/* Authored by: Raymund Joseph M. Rosco
+Company: Patent Pending
+Project: EvacuAid
+Feature: [EVA-70] [DEV] Family Members Screen
+Description: As a user, I want to be able to view the members of each family and it’s family head as 
+well as their zone and contact number. It should also have a clickable button to ‘Add a Family Member.’
+*/
 
+import 'dart:collection';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:collection/collection.dart';
+import 'package:evacuaid/auth/firebase_auth_service.dart';
 import 'package:evacuaid/widgets/CustomDropDown.dart';
 import 'package:evacuaid/widgets/backappbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../widgets/blgunavbar.dart';
-import '../widgets/mainappbar.dart';
 
 const List<String> list = <String>[
   'Select Family Type',
@@ -34,20 +42,39 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
 
   List<Map<String, dynamic>> brgyMembers = [];
   List<Map<String, dynamic>> families = [];
-  List<Map<String, dynamic>> family = [];
+
+  // v1
+  // List<Map<String, dynamic>> family = [];
+  
+  // v2
+  late Future<List<Map<String, dynamic>>> family;
+
   List famMembers = [];
   String? familyId;
+  String? headId;
 
   final _lastnameController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _zoneController = TextEditingController();
   final _contactNumberController = TextEditingController();
   final _birthdayController = TextEditingController();
+  final _authService= FirebaseAuthService();
+
+  Map<String, dynamic> userDetails = {};
+  User? user;
   String? _selectedFamilyType;
   DateTime? _birthday;
   final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
     list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    user = _authService.currentUser;
+    getUserDetails();
+    family = fetchFamMembers();
+  }
 
   @override
   void dispose() {
@@ -60,12 +87,225 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
     super.dispose();
   }
 
+  Future<void> showDeleteModal(id) async {
+    try {
+      await showDialog(
+        context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Are you sure you want to delete the whole family?"),
+          content: Text("You are deleting the family and family members in the system. Are you sure?"),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Yes'),
+              onPressed: () {
+                _deleteFamily(id);
+                updateFamily();
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    } catch (e) {
+      print('Error deleting document: $e');
+    }
+  }
+
+  Future<void> _deleteFamily(id) async {
+    try {
+      
+      QuerySnapshot familiesSnapshot = await FirebaseFirestore.instance.collection('families').get();
+      List members = [];
+      String famId = '';
+
+      for (var doc in familiesSnapshot.docs) {
+        print('----------DOCMEMBERS----------');
+        print(doc['members']);
+        print('----------ID----------');
+        print(id);
+        if (doc['members'].contains(id)) {
+          members = doc['members'];
+          famId = doc.id;
+        }
+      }
+
+      for (var member in members) {
+        await FirebaseFirestore.instance.collection('brgyMembers').doc(member).delete();
+      }
+
+      await FirebaseFirestore.instance.collection('families').doc(famId).delete();
+    } catch (e) {
+      print('Error deleting document: $e');
+    }
+  }
+
+  Future<void> _deleteMember(isHead, id) async {
+  try {
+    if (isHead) {
+      await showDialog(
+        context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Cannot remove family head."),
+          content: Text("Please click 'Delete Family Button' instead to delete whole family."),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+    } else {
+      
+      QuerySnapshot familiesSnapshot = await FirebaseFirestore.instance.collection('families').get();
+      List members = [];
+      String famId = '';
+
+      for (var doc in familiesSnapshot.docs) {
+        print('----------DOCMEMBERS----------');
+        print(doc['members']);
+        print('----------ID----------');
+        print(id);
+        if (doc['members'].contains(id)) {
+          members = doc['members'];
+          print(members);
+          members.remove(id);
+          famId = doc.id;
+        }
+      }
+
+      await FirebaseFirestore.instance.collection('families').doc(famId).update({
+        "members":members
+      });
+      await FirebaseFirestore.instance.collection('brgyMembers').doc(id).delete();
+
+      print('----------FAMID----------');
+      print(famId);
+      print('----------MEMBERS----------');
+      print(members);
+      print('Document successfully deleted!');
+    }
+  } catch (e) {
+    print('Error deleting document: $e');
+  }
+}
+
+  Future<void> getUserDetails() async {
+    QuerySnapshot snapshot =
+        await FirebaseFirestore.instance.collection('users').get();
+
+    for (var doc in snapshot.docs) {
+      if (doc['email'] == await user?.email) {
+        userDetails = {'id': doc.id, ...doc.data() as Map<String, dynamic>};
+        print(userDetails['barangay']);
+        break;
+      }
+    }
+    setState(() {
+      
+    });
+  }
+
   void refresh() {
     setState(() {});
   }
 
+  Future<List<Map<String, dynamic>>> fetchFamMembers() async {
+    // v2
+    List<Map<String, dynamic>> familyList = [];
+
+    QuerySnapshot familiesSnapshot =
+        await FirebaseFirestore.instance.collection('families').get();
+    QuerySnapshot brgyMembersSnapshot =
+        await FirebaseFirestore.instance.collection('brgyMembers').get();
+
+    await Future.delayed(Duration(seconds: 2));
+    famMembers = [];
+    brgyMembers.clear();
+    families.clear();
+    // v1
+    // family.clear();
+
+    headId = widget.id;
+
+    for (var doc in brgyMembersSnapshot.docs) {
+      brgyMembers.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
+    }
+
+    print ('--------------------------brgyMembers-------------------------');
+    print(brgyMembers);
+
+    for (var doc in familiesSnapshot.docs) {
+      if (doc['members'].contains(widget.id)) {
+        familyId = doc.id;
+        print ('--------------------------docMembers-------------------------');
+        print(doc['members']);
+        for (var member in doc['members']) {
+          famMembers.add(member);
+        }
+      }
+    }
+
+    print ('--------------------------famMembers-------------------------');
+    print (famMembers);
+
+    for (var famMember in famMembers) {
+      for (var brgyMember in brgyMembers) {
+        if (famMember == brgyMember['id']) {
+          // v1
+          // family.add({'id': brgyMember['id'], ...brgyMember});
+
+          // v2
+          familyList.add({'id': brgyMember['id'], ...brgyMember});
+        }
+      }
+    }
+
+    // v1
+    // return family;
+
+    // v2
+    print('----------FamilyList-----------');
+    print(familyList);
+    return familyList;
+  }
+
+  // v2
+  void updateFamily () {
+    setState(() {
+      family = fetchFamMembers();
+    });
+  }
+
+  Future<DocumentSnapshot> fetchFamMember(String id) async {
+    DocumentSnapshot famMember = await FirebaseFirestore.instance.collection('brgyMembers').doc(id).get();
+    return famMember;
+  }
+
   Future<void> _addFamilyMember() async {
     try {
+      print(_birthday);
       if (_firstNameController.text.isEmpty ||
           _lastnameController.text.isEmpty ||
           _contactNumberController.text.isEmpty ||
@@ -97,50 +337,82 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
       FirebaseFirestore.instance.collection("families").doc(familyId).update({
         "members": FieldValue.arrayUnion([brgyMembersRef.id]),
       });
-
+      updateFamily();
       setState(() {});
     } catch (e) {}
   }
 
-  Future<List<Map<String, dynamic>>> fetchFamMembers() async {
+  Future<void> _updateFamMember (DocumentSnapshot data, bool? updateHead, String selectedMember) async {
     QuerySnapshot familiesSnapshot =
         await FirebaseFirestore.instance.collection('families').get();
     QuerySnapshot brgyMembersSnapshot =
         await FirebaseFirestore.instance.collection('brgyMembers').get();
 
-    famMembers = [];
-    brgyMembers.clear();
-    families.clear();
-    family.clear();
+    // Update the head of the family in the families collection in firebase
+    // Update the isHead value of the in the brgyMembers collection in firebase
+    if (updateHead != null && updateHead) {
+      List newFamMembers = [];
 
-    famMembers.add(widget.id);
-
-    for (var doc in brgyMembersSnapshot.docs) {
-      brgyMembers.add({'id': doc.id, ...doc.data() as Map<String, dynamic>});
-    }
-
-    for (var doc in familiesSnapshot.docs) {
-      if (doc['head'] == widget.id) {
-        familyId = doc.id;
-        for (var member in doc['members']) {
-          famMembers.add(member);
-        }
+      for (var member in famMembers) {
+        newFamMembers.add(member);
       }
+
+      // // Check if the members of the family is updated when the head of the family is changed
+      // print("selectedMember: $selectedMember with indexOf: ${newFamMembers.indexOf(selectedMember)}");
+      // print("---------------OLD---------------");
+      // print("newFamMembers: $newFamMembers");
+      // print("famMembers: $famMembers");
+      // newFamMembers.swap(0, newFamMembers.indexOf(selectedMember));
+      // print("---------------NEW---------------");
+      // print("newFamMembers: $newFamMembers");
+      // print("famMembers: $famMembers");
+
+      // // Check old head
+      // print('Old Head: $headId');
+
+      // Update isHead value of Old Family Head
+      FirebaseFirestore.instance.collection('brgyMembers').doc(headId).update({
+        "isHead": false,
+      });
+
+      headId = selectedMember;
+      // newFamMembers.remove(headId);
+      
+      // Check if head is updated
+      print('New Head: $headId');
+
+      // Update isHead value of New Family Head
+      await FirebaseFirestore.instance.collection('brgyMembers').doc(headId).update({
+        "isHead": true,
+      });
+      // await FirebaseFirestore.instance.collection('families').doc(familyId).update({
+      //   // "head": headId,
+      //   "members": newFamMembers
+      // });
     }
 
-    for (var famMember in famMembers) {
-      for (var brgyMember in brgyMembers) {
-        if (famMember == brgyMember['id']) {
-          family.add({'id': brgyMember['id'], ...brgyMember});
-        }
-      }
-    }
-    return family;
+    print("Birthday");
+    print(Timestamp.fromDate(DateTime.parse(_birthdayController.value.text)));
+
+    // Update the other values in the brgyMembers collection in firebase
+    await FirebaseFirestore.instance.collection('brgyMembers').doc(selectedMember).update({
+        "birthday": Timestamp.fromDate(DateTime.parse(_birthdayController.value.text)),
+        "contactNumber": _contactNumberController.text.trim(),
+        "firstName": _firstNameController.text.trim(),
+        "lastName": _lastnameController.text.trim(),
+        "memberType": _selectedFamilyType,
+        "zone": _zoneController.text.trim(),
+        "barangay": userDetails['barangay'],
+        "municipality": userDetails['municipality']
+      });
+
+      setState(() {
+        
+      });
   }
 
   @override
   Widget build(BuildContext context) {
-    fetchFamMembers();
     return Scaffold(
       appBar: const BackAppBar(),
       body: Padding(
@@ -281,29 +553,24 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                       ),
                       Expanded(
                         child: FutureBuilder<List<Map<String, dynamic>>>(
+                          // future: family,
                           future: fetchFamMembers(),
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
                               return Center(child: CircularProgressIndicator());
                             }
                             final data = snapshot.data!;
-                            return Container(
+                            return Padding(
                               padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
                               child: Expanded(
                                 child: ListView.builder(
                                   itemCount: data.length,
                                   itemBuilder: (context, index) {
+                                    print(family);
                                     return Column(
                                       children: [
                                         InkWell(
-                                          onTap:
-                                              () => {
-                                                // context.go(
-                                                //   '/familyMembers/' +
-                                                //       snapshot.data!.docs[index]
-                                                //           .data()['id'],
-                                                // ),
-                                              },
+                                          onTap: () => _showEditFamilyMemberDialog(context, data[index]['id']),
                                           child: Container(
                                             height: 36,
                                             decoration: BoxDecoration(
@@ -440,25 +707,56 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
             const SizedBox(height: 16),
             Align(
                 alignment: Alignment.bottomCenter,
-                child: SizedBox(
-                  height: 48,
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed:
-                        () => {_showAddFamilyMemberDialog(context, _birthday)},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.tertiary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed:
+                              () => {
+                                showDeleteModal(widget.id)
+                              },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.error,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          child: Text(
+                            "Delete family",
+                            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    child: Text(
-                      "Add family member",
-                      style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimary,
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed:
+                              () => {_showAddFamilyMemberDialog(context)},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.tertiary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          child: Text(
+                            "Add family member",
+                            style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
           ],
@@ -491,7 +789,7 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
     );
   }
 
-  void _showAddFamilyMemberDialog(BuildContext context, DateTime? bday) {
+  void _showAddFamilyMemberDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -510,7 +808,7 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Add Family Head Details',
+                'Add Family Member',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -535,7 +833,7 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                     );
 
                     if (dateTime != null) {
-                      _birthday = dateTime;
+                      _birthday = await dateTime;
                       String formattedDate = DateFormat(
                         'yyyy-MM-dd',
                       ).format(dateTime);
@@ -590,6 +888,178 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                     onPressed:
                         () => {_addFamilyMember(), Navigator.pop(context)},
                     child: const Text('Save'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showEditFamilyMemberDialog(BuildContext context, String id) async {
+    DocumentSnapshot famMember = await fetchFamMember(id);
+    int milliseconds = int.parse(famMember['birthday'].toString().substring(18,28)) * 1000;
+    DateTime bdayDateTime = new DateTime.fromMillisecondsSinceEpoch(milliseconds);
+    var outputDate = DateFormat('yyyy-MM-dd');
+    String bday = outputDate.format(bdayDateTime);
+    bool? changeToHead = false;
+
+    _firstNameController.value = _firstNameController.value.copyWith(text: famMember['firstName']);
+    _lastnameController.value = _firstNameController.value.copyWith(text: famMember['lastName']);
+    _zoneController.value = _firstNameController.value.copyWith(text: famMember['zone'].toString());
+    _contactNumberController.value = _firstNameController.value.copyWith(text: famMember['contactNumber']);
+    _birthdayController.value = _firstNameController.value.copyWith(text: bday);
+    _selectedFamilyType = famMember['memberType'];
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Update Family Member Details',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _buildInputField('First Name', _firstNameController),
+              _buildInputField('Last Name', _lastnameController, ),
+              _buildInputField('Zone', _zoneController),
+              _buildInputField(
+                'Contact No.',
+                _contactNumberController,
+                isPhone: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: TextField(
+                  readOnly: true,
+                  onTap: () async {
+                    DateTime? dateTime = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                    );
+
+                    if (dateTime != null) {
+                      _birthday = await dateTime;
+                      print(_birthday);
+                      String formattedDate = DateFormat(
+                        'yyyy-MM-dd',
+                      ).format(dateTime);
+
+                      setState(() {
+                        _birthdayController.text = formattedDate;
+                      });
+                    }
+                  },
+                  controller: _birthdayController,
+                  decoration: InputDecoration(
+                    labelText: "Input Birthday",
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+              DropdownMenu<String>(
+                expandedInsets: EdgeInsets.zero,
+                initialSelection: _selectedFamilyType,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                ),
+                onSelected: (String? value) {
+                  setState(() {
+                    _selectedFamilyType = value!;
+                  });
+                },
+                dropdownMenuEntries: menuEntries,
+              ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                      child: SizedBox(
+                        width: 24,
+                        child: StatefulBuilder(builder: (context, setState) {
+                          return Checkbox(
+                            value: changeToHead,
+                            onChanged: (value) {
+                          setState(() {
+                            changeToHead=value;
+                            print(changeToHead);
+                          });
+                        });
+                        })
+                      ),
+                    ),
+                    Text(
+                      "Assign as NEW Family Head?",
+                      style: TextStyle(
+                        fontSize: 16
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                        onPressed: () async {
+                          await _deleteMember(famMember['isHead'], id);
+                          updateFamily();
+                          Navigator.pop(context);
+                        },
+                        child: const Text('Delete',
+                        style: TextStyle(color: Color(0xffff3333)),
+                      )),
+                      const SizedBox(width: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text('Cancel'),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed:
+                            ()  async {
+                              await _updateFamMember(famMember, changeToHead, id);
+                              updateFamily();
+                              Navigator.pop(context);
+                            },
+                        child: const Text('Update'),
+                      ),
+                    ],
                   ),
                 ],
               ),

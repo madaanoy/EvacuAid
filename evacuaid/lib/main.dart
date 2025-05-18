@@ -1,8 +1,10 @@
 // Important Packages
 import 'dart:math' as developer;
 
+import 'package:evacuaid/auth/blgu_user_register.dart';
 import 'package:evacuaid/auth/campmanager_user_login.dart';
 import 'package:evacuaid/auth/login.dart';
+import 'package:evacuaid/screens/camp_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -11,8 +13,6 @@ import 'package:evacuaid/auth/firebase_auth_service.dart';
 import 'dart:async';
 
 // Imported Screens
-import 'package:evacuaid/auth/blgu_user_login.dart';
-import 'package:evacuaid/auth/blgu_user_register.dart';
 import 'package:evacuaid/screens/create_evac_center.dart';
 import 'package:evacuaid/screens/family_members_list.dart';
 import 'package:evacuaid/screens/family_list.dart';
@@ -110,6 +110,11 @@ class _MyAppState extends State<MyApp> {
           ],
         ),
         GoRoute(
+          name: 'camp_manager',
+          path: '/camp_manager',
+          builder: (context, state) => const CampManagerList(),
+        ),
+        GoRoute(
           name: 'notifications',
           path: '/notifications',
           builder: (context, state) => const BlguNotifications(),
@@ -120,19 +125,14 @@ class _MyAppState extends State<MyApp> {
           builder: (context, state) => const LoginScreen(),
         ),
         GoRoute(
-          name: 'CMlogin',
-          path: '/CMlogin',
-          builder: (context, state) => const CMLoginScreen(),
-        ),
-        GoRoute(
-          name: 'BLGUlogin',
-          path: '/BLGUlogin',
-          builder: (context, state) => const BLGULoginScreen(),
-        ),
-        GoRoute(
           name: 'register',
           path: '/register',
           builder: (context, state) => const RegisterScreen(),
+        ),
+        GoRoute(
+          name: 'evacuees',
+          path: '/evacuees',
+          builder: (context, state) => const BlguSummary(),
         ),
       ],
       // redirect: (context, state) {

@@ -25,7 +25,7 @@ class FirebaseAuthService {
     required String password,
     required String contactNumber,
     required String barangay,
-    required String province,
+    required String municipality,
     required String oathOfOfficeUrl,
   }) async {
     try {
@@ -41,7 +41,7 @@ class FirebaseAuthService {
           'email': email,
           'contactNumber': contactNumber,
           'barangay': barangay,
-          'province': province,
+          'municipality': municipality,
           'oathOfOfficeUrl': oathOfOfficeUrl,
           'role': 'blgu_user',
           'createdAt': FieldValue.serverTimestamp(),

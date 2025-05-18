@@ -47,7 +47,7 @@ class CampManagerNavbar extends StatelessWidget {
               context.go('/summary');
               break;
             case 1:
-              context.go('/families');
+              context.go('/evacuees');
               break;
             case 2:
               context.go('/centers');

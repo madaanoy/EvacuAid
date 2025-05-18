@@ -1,3 +1,4 @@
+import 'package:evacuaid/auth/firebase_auth_service.dart';
 import 'package:flutter/material.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -5,6 +6,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final _authService = FirebaseAuthService();
     return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -13,7 +15,9 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Image.asset('assets/logos/logo.png', height: 20),
           IconButton(
-            onPressed: () => {},
+            onPressed: () => {
+              _authService.signOut(context)
+            },
             icon: Icon(
               Icons.account_circle_rounded,
               size: 24,
