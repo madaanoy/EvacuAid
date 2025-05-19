@@ -31,6 +31,12 @@ const List<String> list = <String>[
   'N/a',
 ];
 
+const List<String> list1 = <String>[
+  'Select sex',
+  'Male',
+  'Female'
+];
+
 class BlguFamilyList extends StatefulWidget {
   const BlguFamilyList({super.key});
 
@@ -47,11 +53,20 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
   final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
     list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
   );
-  final _authService= FirebaseAuthService();
+  final List<MenuEntry> sex = UnmodifiableListView<MenuEntry>(
+    list1.map<MenuEntry>((String name) => MenuEntry(value: name, label: name))
+  );
+
+  final _authService = FirebaseAuthService();
   bool? authenticated;
+  bool? pregnant = false;
+  bool? lactating = false;
+  bool? wIllness = false;
+  bool? pwd = false;
 
   User? user;
   String? _selectedFamilyType;
+  String? _selectedSex;
   DateTime? _birthday;
   String? id;
 
@@ -69,9 +84,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
         break;
       }
     }
-    setState(() {
-      
-    });
+    setState(() {});
   }
 
   @override
@@ -108,7 +121,11 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
           _contactNumberController.text.isEmpty ||
           _birthdayController.text.isEmpty ||
           _selectedFamilyType == null) {
-        _dialogBuilder(context, 'Complete all fields', 'Please fill-up all fields, you may have\n left some fields blank or have wrong inputs.');
+        _dialogBuilder(
+          context,
+          'Complete all fields',
+          'Please fill-up all fields, you may have\n left some fields blank or have wrong inputs.',
+        );
         throw 'Please fill in all fields';
       }
 
@@ -124,11 +141,17 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
         "contactNumber": _contactNumberController.text.trim(),
         "zone": int.parse(_zoneController.text.trim()),
         "memberType": _selectedFamilyType,
+        "sex": _selectedSex,
         "birthday": _birthday,
         "isHead": true,
         "barangay": userDetails['barangay'],
         "municipality": userDetails['municipality'],
         "dateRegistered": DateTime.now(),
+        "evacuee": false,
+        "pregnant": pregnant,
+        "lactating": lactating,
+        "pwd": pwd,
+        "wIllness": wIllness
       });
 
       FirebaseFirestore.instance.collection("families").add({
@@ -153,49 +176,53 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
               Text(
                 'Family Heads',
                 style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              ),
-              SizedBox(height: 8,),
+              SizedBox(height: 8),
               Container(
-                        padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.vertical(top: Radius.circular(8))
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Container(
-                                child: Text(
-                                  "Name",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Row(
-                                children: [
-                                  Text(
-                                    "Zone",
-                                    style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context).colorScheme.onPrimary
-                                    ),
-                                  ),
-                                  Icon(Icons.arrow_drop_down, size: 20, color: Theme.of(context).colorScheme.onPrimary,),
-                                ],
-                              ),
-                            ),
-                          ],
+                padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: Container(
+                        child: Text(
+                          "Name",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                         ),
                       ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Text(
+                            "Zone",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                          ),
+                          Icon(
+                            Icons.arrow_drop_down,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Expanded(
                 child: Container(
                   padding: EdgeInsets.all(16),
@@ -224,11 +251,20 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
                             child: ListView.builder(
                               itemCount: snapshot.data!.docs.length,
                               itemBuilder: (context, index) {
-                                print(snapshot.data!.docs[index].data()['barangay'] == userDetails['barangay']);
-                                if (snapshot.data!.docs[index].data()['isHead'] == true 
-                                && snapshot.data!.docs[index].data()['barangay'] == userDetails['barangay']
-                                && snapshot.data!.docs[index].data()['municipality'] == userDetails['municipality']
-                                ) {
+                                print(
+                                  snapshot.data!.docs[index]
+                                          .data()['barangay'] ==
+                                      userDetails['barangay'],
+                                );
+                                if (snapshot.data!.docs[index]
+                                            .data()['isHead'] ==
+                                        true &&
+                                    snapshot.data!.docs[index]
+                                            .data()['barangay'] ==
+                                        userDetails['barangay'] &&
+                                    snapshot.data!.docs[index]
+                                            .data()['municipality'] ==
+                                        userDetails['municipality']) {
                                   return Column(
                                     children: [
                                       InkWell(
@@ -290,7 +326,7 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
                   ),
                 ),
               ),
-              SizedBox(height: 16,),
+              SizedBox(height: 16),
               Align(
                 alignment: Alignment.bottomCenter,
                 child: SizedBox(
@@ -415,6 +451,110 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
+              SizedBox(height: 8,),
+              DropdownMenu<String>(
+                expandedInsets: EdgeInsets.zero,
+                initialSelection: list1.first,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                ),
+                onSelected: (String? value) {
+                  setState(() {
+                    _selectedSex = value!;
+                  });
+                },
+                dropdownMenuEntries: sex,
+              ),
+              SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Select all that apply:", textAlign: TextAlign.start,),
+              ),
+              StatefulBuilder(
+                builder: (BuildContext context, void Function(void Function()) setState) { 
+
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: pregnant,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pregnant = newVal;
+                              });
+                            },
+                          ),
+                          Text("Pregnant"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: lactating,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pregnant = newVal;
+                              });
+                            },
+                          ),
+                          Text("Lactating"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: pwd,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pwd = newVal;
+                              });
+                            },
+                          ),
+                          Text("PWD"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: wIllness,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                wIllness = newVal;
+                              });
+                            },
+                          ),
+                          Text("Ill"),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                 },
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -452,8 +592,8 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
       child: TextFormField(
         validator: (value) {
           if (value == null || value.isEmpty) {
-              return 'Please fill-up all fields.';
-            }
+            return 'Please fill-up all fields.';
+          }
           return null;
         },
         controller: controller,
@@ -466,7 +606,11 @@ class _BlguFamilyListState extends State<BlguFamilyList> {
     );
   }
 
-  Future<void> _dialogBuilder(BuildContext context, String title, String content) {
+  Future<void> _dialogBuilder(
+    BuildContext context,
+    String title,
+    String content,
+  ) {
     return showDialog<void>(
       context: context,
       builder: (BuildContext context) {

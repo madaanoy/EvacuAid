@@ -5,6 +5,8 @@ import 'package:evacuaid/auth/blgu_user_register.dart';
 import 'package:evacuaid/auth/campmanager_user_login.dart';
 import 'package:evacuaid/auth/login.dart';
 import 'package:evacuaid/screens/camp_manager.dart';
+import 'package:evacuaid/screens/summary.dart';
+import 'package:evacuaid/screens/evacuees.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -78,7 +80,7 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           name: 'summary',
           path: '/summary',
-          builder: (context, state) => const BlguSummary(),
+          builder: (context, state) => const Summary(),
         ),
         GoRoute(
           name: 'families',
@@ -132,7 +134,7 @@ class _MyAppState extends State<MyApp> {
         GoRoute(
           name: 'evacuees',
           path: '/evacuees',
-          builder: (context, state) => const BlguSummary(),
+          builder: (context, state) => const EvacueesList(id: 'sda'),
         ),
       ],
       // redirect: (context, state) {
@@ -187,4 +189,8 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+}
+
+class BlguSummary {
+  const BlguSummary();
 }

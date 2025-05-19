@@ -126,10 +126,9 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
         _dialogBuilder(context);
         throw 'Please fill in all fields';
       }
-      CollectionReference evacCenter = FirebaseFirestore.instance.collection(
+      CollectionReference evacCenter = await FirebaseFirestore.instance.collection(
         'evacCenter',
       );
-      // DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(_campManager).get();
 
       DocumentReference evacCenterRef = await evacCenter.add({
         "name": _nameController.text.trim(),
@@ -138,9 +137,12 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
         "dateRegistered": DateTime.now(),
       });
 
-      FirebaseFirestore.instance.collection("users").doc(_campManager).update({
+      await FirebaseFirestore.instance.collection("users").doc(_campManagerID).update({
         "assigned": true,
+        "evacCenter": evacCenterRef.id
       });
+
+      fetchCampManagers();
     } catch (e) {
       print(e);
     }
@@ -154,54 +156,34 @@ class _BlguEvacCenterListState extends State<BlguEvacCenterList> {
         _dialogBuilder(context);
         throw 'Please fill in all fields';
       }
+
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance.collection('evacCenter').doc(id).get();
+      Map<String, dynamic> data = documentSnapshot.data() as Map<String, dynamic>;
+
+      print(data);
+
+      await FirebaseFirestore.instance.collection('users').doc(data['campManager']).update({
+        "assigned": false,
+        "evacCenter": ""
+      });
+
       await FirebaseFirestore.instance.collection('evacCenter').doc(id).update({
         "name": _nameController.text.trim(),
         "zone": _zoneController.text.trim(),
         "campManager": _campManagerID
       });
-    } catch (e) {
-      print(e);
-    }
-  }
 
-  Future<void> _addCampManager() async {
-    try {
-      if (_firstNameController.text.isEmpty ||
-          _lastNameController.text.isEmpty ||
-          _emailController.text.isEmpty ||
-          _zoneCMController.text.isEmpty ||
-          _contactNumberController.text.isEmpty ||
-          _passwordController.text.isEmpty ||
-          _confirmPasswordController.text.isEmpty) {
-        _dialogBuilder(context);
-        throw 'Please fill in all fields';
-      }
-
-      CollectionReference campManagerCRef = FirebaseFirestore.instance
-          .collection('users');
-
-      await _authService.registerCampManagerWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
-      );
-
-      DocumentReference campManagerRef = await campManagerCRef.add({
-        "firstName": _firstNameController.text.trim(),
-        "lastName": _lastNameController.text.trim(),
-        "email": _emailController.text.trim(),
-        "zone": int.parse(_zoneCMController.text.trim()),
-        "contactNumber": _contactNumberController.text.trim(),
-        "dateRegistered": DateTime.now(),
-        "assigned": false,
-        "role": "camp_manager_user",
+      await FirebaseFirestore.instance.collection('users').doc(_campManagerID).update({
+        "evacCenter": id,
+        "assigned": true
       });
 
       fetchCampManagers();
-      setState(() {});
     } catch (e) {
       print(e);
     }
   }
+
 
   Future<void> deleteEvacCenter(id, userID) async {
     await FirebaseFirestore.instance.collection('users').doc(userID).update({

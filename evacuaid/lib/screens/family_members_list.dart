@@ -28,6 +28,12 @@ const List<String> list = <String>[
   'N/a',
 ];
 
+const List<String> list1 = <String>[
+  'Select sex',
+  'Male',
+  'Female'
+];
+
 class BlguFamilyMembersList extends StatefulWidget {
   final id;
   // const BlguFamilyMembersList({super.key});
@@ -52,6 +58,10 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
   List famMembers = [];
   String? familyId;
   String? headId;
+  bool? pregnant = false;
+  bool? lactating = false;
+  bool? wIllness = false;
+  bool? pwd = false;
 
   final _lastnameController = TextEditingController();
   final _firstNameController = TextEditingController();
@@ -63,9 +73,13 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
   Map<String, dynamic> userDetails = {};
   User? user;
   String? _selectedFamilyType;
+  String? _selectedSex;
   DateTime? _birthday;
   final List<MenuEntry> menuEntries = UnmodifiableListView<MenuEntry>(
     list.map<MenuEntry>((String name) => MenuEntry(value: name, label: name)),
+  );
+  final List<MenuEntry> sex = UnmodifiableListView<MenuEntry>(
+    list1.map<MenuEntry>((String name) => MenuEntry(value: name, label: name))
   );
 
   @override
@@ -84,6 +98,7 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
     _birthdayController.dispose();
     _birthday = null;
     _selectedFamilyType = null;
+    _selectedSex = null;
     super.dispose();
   }
 
@@ -133,10 +148,6 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
       String famId = '';
 
       for (var doc in familiesSnapshot.docs) {
-        print('----------DOCMEMBERS----------');
-        print(doc['members']);
-        print('----------ID----------');
-        print(id);
         if (doc['members'].contains(id)) {
           members = doc['members'];
           famId = doc.id;
@@ -183,10 +194,6 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
       String famId = '';
 
       for (var doc in familiesSnapshot.docs) {
-        print('----------DOCMEMBERS----------');
-        print(doc['members']);
-        print('----------ID----------');
-        print(id);
         if (doc['members'].contains(id)) {
           members = doc['members'];
           print(members);
@@ -200,10 +207,6 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
       });
       await FirebaseFirestore.instance.collection('brgyMembers').doc(id).delete();
 
-      print('----------FAMID----------');
-      print(famId);
-      print('----------MEMBERS----------');
-      print(members);
       print('Document successfully deleted!');
     }
   } catch (e) {
@@ -329,9 +332,17 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
         "contactNumber": _contactNumberController.text.trim(),
         "zone": int.parse(_zoneController.text.trim()),
         "memberType": _selectedFamilyType,
+        "sex": _selectedSex,
         "birthday": _birthday,
         "isHead": false,
         "dateRegistered": DateTime.now(),
+        "evacuee": false,
+        "pregnant": pregnant,
+        "lactating": lactating,
+        "pwd": pwd,
+        "wIllness": wIllness,
+        "barangay": userDetails['barangay'],
+        "municipality": userDetails['municipality'],
       });
 
       FirebaseFirestore.instance.collection("families").doc(familyId).update({
@@ -357,26 +368,12 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
         newFamMembers.add(member);
       }
 
-      // // Check if the members of the family is updated when the head of the family is changed
-      // print("selectedMember: $selectedMember with indexOf: ${newFamMembers.indexOf(selectedMember)}");
-      // print("---------------OLD---------------");
-      // print("newFamMembers: $newFamMembers");
-      // print("famMembers: $famMembers");
-      // newFamMembers.swap(0, newFamMembers.indexOf(selectedMember));
-      // print("---------------NEW---------------");
-      // print("newFamMembers: $newFamMembers");
-      // print("famMembers: $famMembers");
-
-      // // Check old head
-      // print('Old Head: $headId');
-
       // Update isHead value of Old Family Head
       FirebaseFirestore.instance.collection('brgyMembers').doc(headId).update({
         "isHead": false,
       });
 
       headId = selectedMember;
-      // newFamMembers.remove(headId);
       
       // Check if head is updated
       print('New Head: $headId');
@@ -385,10 +382,6 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
       await FirebaseFirestore.instance.collection('brgyMembers').doc(headId).update({
         "isHead": true,
       });
-      // await FirebaseFirestore.instance.collection('families').doc(familyId).update({
-      //   // "head": headId,
-      //   "members": newFamMembers
-      // });
     }
 
     print("Birthday");
@@ -403,7 +396,12 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
         "memberType": _selectedFamilyType,
         "zone": _zoneController.text.trim(),
         "barangay": userDetails['barangay'],
-        "municipality": userDetails['municipality']
+        "municipality": userDetails['municipality'],
+        "sex": _selectedSex,
+        "pregnant": pregnant,
+        "pwd": pwd,
+        "lactating": lactating,
+        "wIllness": wIllness
       });
 
       setState(() {
@@ -588,7 +586,8 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                                                 Expanded(
                                                   flex: 2,
                                                   child: Text(
-                                                    data[index]['firstName']
+                                                    data[index]['lastName']
+                                                        .toString() + ', ' + data[index]['firstName']
                                                         .toString(),
                                                     style: TextStyle(
                                                       color:
@@ -875,6 +874,110 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
+              SizedBox(height: 8,),
+              DropdownMenu<String>(
+                expandedInsets: EdgeInsets.zero,
+                initialSelection: list1.first,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                ),
+                onSelected: (String? value) {
+                  setState(() {
+                    _selectedSex = value!;
+                  });
+                },
+                dropdownMenuEntries: sex,
+              ),
+              SizedBox(height: 8,),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Select all that apply:", textAlign: TextAlign.start,),
+              ),
+              StatefulBuilder(
+                builder: (BuildContext context, void Function(void Function()) setState) { 
+
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: pregnant,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pregnant = newVal;
+                              });
+                            },
+                          ),
+                          Text("Pregnant"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: lactating,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pregnant = newVal;
+                              });
+                            },
+                          ),
+                          Text("Lactating"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: pwd,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pwd = newVal;
+                              });
+                            },
+                          ),
+                          Text("PWD"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: wIllness,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                wIllness = newVal;
+                              });
+                            },
+                          ),
+                          Text("Ill"),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                 },
+              ),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -912,6 +1015,11 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
     _contactNumberController.value = _firstNameController.value.copyWith(text: famMember['contactNumber']);
     _birthdayController.value = _firstNameController.value.copyWith(text: bday);
     _selectedFamilyType = famMember['memberType'];
+    _selectedSex = famMember['sex'];
+    pregnant = famMember['pregnant'];
+    lactating = famMember['lactating'];
+    pwd = famMember['pwd'];
+    wIllness = famMember['wIllness'];
 
     showModalBottomSheet(
       context: context,
@@ -999,12 +1107,120 @@ class _BlguFamilyMembersListState extends State<BlguFamilyMembersList> {
                 },
                 dropdownMenuEntries: menuEntries,
               ),
+              SizedBox(height: 8,),
+              DropdownMenu<String>(
+                expandedInsets: EdgeInsets.zero,
+                initialSelection: _selectedSex,
+                inputDecorationTheme: InputDecorationTheme(
+                  filled: true,
+                  fillColor: Theme.of(context).colorScheme.surfaceContainer,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  hintStyle: TextStyle(
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                  ),
+                ),
+                onSelected: (String? value) {
+                  setState(() {
+                    _selectedSex = value!;
+                  });
+                },
+                dropdownMenuEntries: sex,
+              ),
+              SizedBox(height: 8,),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text("Select all that apply:", textAlign: TextAlign.start,),
+              ),
+              StatefulBuilder(
+                builder: (BuildContext context, void Function(void Function()) setState) { 
+
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: pregnant,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pregnant = newVal;
+                              });
+                            },
+                          ),
+                          Text("Pregnant"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: lactating,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pregnant = newVal;
+                              });
+                            },
+                          ),
+                          Text("Lactating"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: pwd,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                pwd = newVal;
+                              });
+                            },
+                          ),
+                          Text("PWD"),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        children: [
+                          Checkbox(
+                            value: wIllness,
+                            onChanged: (bool? newVal) {
+                              setState(() {
+                                wIllness = newVal;
+                              });
+                            },
+                          ),
+                          Text("Ill"),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+                 },
+              ),
+              Divider(
+                color: Theme.of(context).colorScheme.onSurface,
+                thickness: 1,
+              ),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Row(
                   children: [
                     Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 8, 0),
+                      padding: EdgeInsets.fromLTRB(4, 0, 8, 0),
                       child: SizedBox(
                         width: 24,
                         child: StatefulBuilder(builder: (context, setState) {

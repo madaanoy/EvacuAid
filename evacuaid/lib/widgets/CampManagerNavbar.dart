@@ -31,10 +31,6 @@ class CampManagerNavbar extends StatelessWidget {
             icon: Icon(Icons.group),
             label: 'Evacuees',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_active_rounded),
-            label: 'Notifications',
-          ),
         ],
         currentIndex: activeIndex,
         selectedItemColor: Color(0xff0438D1),
@@ -48,12 +44,6 @@ class CampManagerNavbar extends StatelessWidget {
               break;
             case 1:
               context.go('/evacuees');
-              break;
-            case 2:
-              context.go('/centers');
-              break;
-            case 3:
-              context.go('/notifications');
               break;
             default:
           }
